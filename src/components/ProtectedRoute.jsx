@@ -22,7 +22,7 @@ function ProtectedRoute({ children }) {
 
   if (isAuth === false) {
     // redirect to auth-service login page
-    window.location.href = "http://127.0.0.1:3000"; 
+    window.location.href = "https://auth.bytrait.com/"; 
   }
 
   return children;
