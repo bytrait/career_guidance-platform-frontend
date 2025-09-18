@@ -1,11 +1,21 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { fetchUserDetailsById } from "../../services/userAssessmentProgressService";
 
 export default function OceanInstructions({ onStart }) {
+   const [userDetails, setUserDetails] = useState(null);
+  
+     useEffect(() => {
+        const getUserDetails = async () => {
+          const userDetails = await fetchUserDetailsById();
+          setUserDetails(userDetails);
+        };
+        getUserDetails();
+      }, []);
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-6xl mx-auto p-6 rounded-sm flex flex-col justify-center shadow z-50 bg-white">
         <h2 className="text-5xl font-bold ">
-          <span className="text-gray-700">Dear</span> <span className="text-blue-700">Sanket Gaikwad</span>
+          <span className="text-gray-700">Dear</span> <span className="text-blue-700">{userDetails?.fullName}</span>
         </h2>
         <h3 className="text-3xl text-gray-700 font-semibold mt-4 mb-6">
           Let's start with the personality test. Please note a few points before you start.

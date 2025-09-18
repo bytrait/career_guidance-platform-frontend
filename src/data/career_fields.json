@@ -1,0 +1,618 @@
+[
+  {
+    "careerField": {
+      "en": "Event Management",
+      "mr": "इव्हेंट व्यवस्थापन"
+    },
+    "scores": {
+      "R": 0.2,
+      "I": 0.2,
+      "A": 0.4,
+      "S": 0.6,
+      "E": 0.7,
+      "C": 0.3
+    }
+  },
+  {
+    "careerField": {
+      "en": "Data Science & AI",
+      "mr": "डेटा सायन्स आणि कृत्रिम बुद्धिमत्ता"
+    },
+    "scores": {
+      "R": 0.2,
+      "I": 0.9,
+      "A": 0.2,
+      "S": 0.1,
+      "E": 0.3,
+      "C": 0.5
+    }
+  },
+  {
+    "careerField": {
+      "en": "Journalism & Content Creation",
+      "mr": "पत्रकारिता आणि सामग्री निर्मिती"
+    },
+    "scores": {
+      "R": 0.0,
+      "I": 0.3,
+      "A": 0.7,
+      "S": 0.5,
+      "E": 0.5,
+      "C": 0.2
+    }
+  },
+  {
+    "careerField": {
+      "en": "Renewable Energy",
+      "mr": "नवीकरणीय ऊर्जा"
+    },
+    "scores": {
+      "R": 0.4,
+      "I": 0.6,
+      "A": 0.2,
+      "S": 0.3,
+      "E": 0.4,
+      "C": 0.3
+    }
+  },
+  {
+    "careerField": {
+      "en": "Public Policy & International Relations",
+      "mr": "सार्वजनिक धोरणे आणि आंतरराष्ट्रीय संबंध"
+    },
+    "scores": {
+      "R": 0.0,
+      "I": 0.6,
+      "A": 0.2,
+      "S": 0.7,
+      "E": 0.3,
+      "C": 0.4
+    }
+  },
+  {
+    "careerField": {
+      "en": "Aviation & Aeronautics",
+      "mr": "विमानचालन आणि एरोनॉटिक्स"
+    },
+    "scores": {
+      "R": 0.6,
+      "I": 0.5,
+      "A": 0.1,
+      "S": 0.2,
+      "E": 0.4,
+      "C": 0.4
+    }
+  },
+  {
+    "careerField": {
+      "en": "Cybersecurity",
+      "mr": "सायबरसुरक्षा"
+    },
+    "scores": {
+      "R": 0.2,
+      "I": 0.7,
+      "A": 0.1,
+      "S": 0.2,
+      "E": 0.3,
+      "C": 0.6
+    }
+  },
+  {
+    "careerField": {
+      "en": "Animation & Gaming",
+      "mr": "अॅनिमेशन आणि गेमिंग"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.4,
+      "A": 0.8,
+      "S": 0.2,
+      "E": 0.3,
+      "C": 0.2
+    }
+  },
+  {
+    "careerField": {
+      "en": "Fashion & Lifestyle",
+      "mr": "फॅशन आणि जीवनशैली"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.2,
+      "A": 0.7,
+      "S": 0.3,
+      "E": 0.5,
+      "C": 0.2
+    }
+  },
+  {
+    "careerField": {
+      "en": "Health, Medicine & Fitness",
+      "mr": "आरोग्य, वैद्यक आणि फिटनेस"
+    },
+    "scores": {
+      "R": 0.2,
+      "I": 0.6,
+      "A": 0.1,
+      "S": 0.7,
+      "E": 0.2,
+      "C": 0.2
+    }
+  },
+  {
+    "careerField": {
+      "en": "Environmental Sciences",
+      "mr": "पर्यावरण विज्ञान"
+    },
+    "scores": {
+      "R": 0.3,
+      "I": 0.6,
+      "A": 0.2,
+      "S": 0.4,
+      "E": 0.2,
+      "C": 0.3
+    }
+  },
+  {
+    "careerField": {
+      "en": "Agriculture & Food Sciences",
+      "mr": "कृषी आणि अन्न विज्ञान"
+    },
+    "scores": {
+      "R": 0.6,
+      "I": 0.4,
+      "A": 0.1,
+      "S": 0.3,
+      "E": 0.3,
+      "C": 0.3
+    }
+  },
+  {
+    "careerField": {
+      "en": "Marketing",
+      "mr": "विपणन"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.2,
+      "A": 0.4,
+      "S": 0.3,
+      "E": 0.7,
+      "C": 0.2
+    }
+  },
+  {
+    "careerField": {
+      "en": "Sports & Physical Education",
+      "mr": "क्रीडा आणि शारीरिक शिक्षण"
+    },
+    "scores": {
+      "R": 0.6,
+      "I": 0.2,
+      "A": 0.1,
+      "S": 0.5,
+      "E": 0.4,
+      "C": 0.2
+    }
+  },
+  {
+    "careerField": {
+      "en": "Science & Maths",
+      "mr": "विज्ञान आणि गणित"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 1.0,
+      "A": 0.1,
+      "S": 0.1,
+      "E": 0.1,
+      "C": 0.4
+    }
+  },
+  {
+    "careerField": {
+      "en": "Legal",
+      "mr": "कायदा"
+    },
+    "scores": {
+      "R": 0.0,
+      "I": 0.4,
+      "A": 0.1,
+      "S": 0.3,
+      "E": 0.5,
+      "C": 0.6
+    }
+  },
+  {
+    "careerField": {
+      "en": "Actuarial Sciences",
+      "mr": "अॅक्चुरियल सायन्सेस"
+    },
+    "scores": {
+      "R": 0.0,
+      "I": 0.8,
+      "A": 0.0,
+      "S": 0.1,
+      "E": 0.1,
+      "C": 0.9
+    }
+  },
+  {
+    "careerField": {
+      "en": "Engineering, Information & Technology",
+      "mr": "अभियांत्रिकी, माहिती आणि तंत्रज्ञान"
+    },
+    "scores": {
+      "R": 0.5,
+      "I": 0.7,
+      "A": 0.1,
+      "S": 0.1,
+      "E": 0.1,
+      "C": 0.3
+    }
+  },
+  {
+    "careerField": {
+      "en": "Entrepreneurship",
+      "mr": "उद्योजकता"
+    },
+    "scores": {
+      "R": 0.2,
+      "I": 0.2,
+      "A": 0.3,
+      "S": 0.1,
+      "E": 0.8,
+      "C": 0.1
+    }
+  },
+  {
+    "careerField": {
+      "en": "Social Sciences & Humanities",
+      "mr": "सामाजिक शास्त्रे आणि मानवशास्त्र"
+    },
+    "scores": {
+      "R": 0.0,
+      "I": 0.6,
+      "A": 0.3,
+      "S": 0.4,
+      "E": 0.2,
+      "C": 0.2
+    }
+  },
+  {
+    "careerField": {
+      "en": "Hospitality",
+      "mr": "आतिथ्य सेवा"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.1,
+      "A": 0.1,
+      "S": 0.7,
+      "E": 0.5,
+      "C": 0.3
+    }
+  },
+  {
+    "careerField": {
+      "en": "Sales",
+      "mr": "विक्री"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.1,
+      "A": 0.1,
+      "S": 0.3,
+      "E": 0.9,
+      "C": 0.1
+    }
+  },
+  {
+    "careerField": {
+      "en": "Education Training & Social Services",
+      "mr": "शिक्षण प्रशिक्षण आणि सामाजिक सेवा"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.2,
+      "A": 0.2,
+      "S": 0.8,
+      "E": 0.2,
+      "C": 0.2
+    }
+  },
+  {
+    "careerField": {
+      "en": "Media & Communication",
+      "mr": "माध्यम आणि संवाद"
+    },
+    "scores": {
+      "R": 0.0,
+      "I": 0.2,
+      "A": 0.6,
+      "S": 0.3,
+      "E": 0.4,
+      "C": 0.1
+    }
+  },
+  {
+    "careerField": {
+      "en": "Governance & Administration",
+      "mr": "शासन आणि प्रशासन"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.2,
+      "A": 0.0,
+      "S": 0.2,
+      "E": 0.5,
+      "C": 0.7
+    }
+  },
+  {
+    "careerField": {
+      "en": "Commerce & Management",
+      "mr": "वाणिज्य आणि व्यवस्थापन"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.2,
+      "A": 0.1,
+      "S": 0.2,
+      "E": 0.5,
+      "C": 0.5
+    }
+  },
+  {
+    "careerField": {
+      "en": "Performing Arts",
+      "mr": "प्रदर्शन कला"
+    },
+    "scores": {
+      "R": 0.0,
+      "I": 0.0,
+      "A": 1.0,
+      "S": 0.2,
+      "E": 0.3,
+      "C": 0.0
+    }
+  },
+  {
+    "careerField": {
+      "en": "Design",
+      "mr": "डिझाईन"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.2,
+      "A": 0.8,
+      "S": 0.1,
+      "E": 0.2,
+      "C": 0.1
+    }
+  },
+  {
+    "careerField": {
+      "en": "Applied Arts",
+      "mr": "अर्जित कला"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.1,
+      "A": 0.7,
+      "S": 0.2,
+      "E": 0.3,
+      "C": 0.1
+    }
+  },
+  {
+    "careerField": {
+      "en": "Defense Services",
+      "mr": "संरक्षण सेवा"
+    },
+    "scores": {
+      "R": 0.6,
+      "I": 0.2,
+      "A": 0.0,
+      "S": 0.2,
+      "E": 0.3,
+      "C": 0.3
+    }
+  },
+  {
+    "careerField": {
+      "en": "Finance & Accounting",
+      "mr": "वित्त आणि लेखांकन"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.3,
+      "A": 0.0,
+      "S": 0.1,
+      "E": 0.3,
+      "C": 0.8
+    }
+  },
+  {
+    "careerField": {
+      "en": "Distribution & Logistics",
+      "mr": "वितरण आणि लॉजिस्टिक्स"
+    },
+    "scores": {
+      "R": 0.5,
+      "I": 0.3,
+      "A": 0.0,
+      "S": 0.1,
+      "E": 0.2,
+      "C": 0.4
+    }
+  },
+  {
+    "careerField": {
+      "en": "AI & Machine Learning",
+      "mr": "कृत्रिम बुद्धिमत्ता आणि मशीन लर्निंग"
+    },
+    "scores": {
+      "R": 0.2,
+      "I": 0.9,
+      "A": 0.2,
+      "S": 0.1,
+      "E": 0.3,
+      "C": 0.4
+    }
+  },
+  {
+    "careerField": {
+      "en": "Blockchain Technology",
+      "mr": "ब्लॉकचेन तंत्रज्ञान"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.8,
+      "A": 0.2,
+      "S": 0.1,
+      "E": 0.3,
+      "C": 0.5
+    }
+  },
+  {
+    "careerField": {
+      "en": "Sustainable Architecture",
+      "mr": "शाश्वत वास्तुकला"
+    },
+    "scores": {
+      "R": 0.4,
+      "I": 0.4,
+      "A": 0.2,
+      "S": 0.2,
+      "E": 0.2,
+      "C": 0.3
+    }
+  },
+  {
+    "careerField": {
+      "en": "Space Sciences",
+      "mr": "अंतराळ विज्ञान"
+    },
+    "scores": {
+      "R": 0.3,
+      "I": 1.0,
+      "A": 0.1,
+      "S": 0.1,
+      "E": 0.2,
+      "C": 0.3
+    }
+  },
+  {
+    "careerField": {
+      "en": "Biotechnology",
+      "mr": "जैवतंत्रज्ञान"
+    },
+    "scores": {
+      "R": 0.3,
+      "I": 0.9,
+      "A": 0.3,
+      "S": 0.2,
+      "E": 0.2,
+      "C": 0.4
+    }
+  },
+  {
+    "careerField": {
+      "en": "UX/UI Design",
+      "mr": "यूएक्स/यूआय डिझाईन"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.3,
+      "A": 0.7,
+      "S": 0.2,
+      "E": 0.4,
+      "C": 0.2
+    }
+  },
+  {
+    "careerField": {
+      "en": "Climate Change Policy",
+      "mr": "हवामान बदल धोरण"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.6,
+      "A": 0.2,
+      "S": 0.6,
+      "E": 0.4,
+      "C": 0.3
+    }
+  },
+  {
+    "careerField": {
+      "en": "Neuroscience",
+      "mr": "मेंदूविज्ञान"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.8,
+      "A": 0.2,
+      "S": 0.2,
+      "E": 0.2,
+      "C": 0.3
+    }
+  },
+  {
+    "careerField": {
+      "en": "Digital Marketing",
+      "mr": "डिजिटल विपणन"
+    },
+    "scores": {
+      "R": 0.0,
+      "I": 0.2,
+      "A": 0.3,
+      "S": 0.3,
+      "E": 0.6,
+      "C": 0.3
+    }
+  },
+  {
+    "careerField": {
+      "en": "E-Sports & Game Streaming",
+      "mr": "ई-स्पोर्ट्स आणि गेम स्ट्रीमिंग"
+    },
+    "scores": {
+      "R": 0.1,
+      "I": 0.2,
+      "A": 0.5,
+      "S": 0.3,
+      "E": 0.7,
+      "C": 0.1
+    }
+  },
+  {
+    "careerField": {
+      "en": "Robotics & Automation",
+      "mr": "रोबोटिक्स आणि स्वयंचलन"
+    },
+    "scores": {
+      "R": 0.6,
+      "I": 0.8,
+      "A": 0.1,
+      "S": 0.1,
+      "E": 0.3,
+      "C": 0.4
+    }
+  },
+  {
+    "careerField": {
+      "en": "3D Printing & Additive Mfg.",
+      "mr": "३डी प्रिंटिंग आणि अॅडिटीव्ह मॅन्युफॅक्चरिंग"
+    },
+    "scores": {
+      "R": 0.5,
+      "I": 0.7,
+      "A": 0.3,
+      "S": 0.1,
+      "E": 0.3,
+      "C": 0.4
+    }
+  }
+]

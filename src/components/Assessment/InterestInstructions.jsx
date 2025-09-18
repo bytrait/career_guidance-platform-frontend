@@ -1,9 +1,21 @@
+import { useEffect, useState } from "react";
+import { fetchUserDetailsById } from "../../services/userAssessmentProgressService";
+
 export default function InterestInstructions({ onStart }) {
+  const [userDetails, setUserDetails] = useState(null);
+    
+       useEffect(() => {
+          const getUserDetails = async () => {
+            const userDetails = await fetchUserDetailsById();
+            setUserDetails(userDetails);
+          };
+          getUserDetails();
+        }, []);
   return (
     <div className="fixed inset-0 flex justify-center items-center">
       <div className="w-full max-w-6xl p-6 rounded-sm flex flex-col justify-center bg-white shadow z-50">
         <h2 className="text-5xl font-bold ">
-          <span className="text-gray-700">Dear</span> <span className="text-blue-700">Sanket Gaikwad</span>
+          <span className="text-gray-700">Dear</span> <span className="text-blue-700">{userDetails?.fullName}</span>
         </h2>
         <h3 className="text-3xl text-gray-700 font-semibold mt-4 mb-6">
           We will now move to the career interest test. Please note these points before you start

@@ -19,3 +19,9 @@ export async function completeUserProgress() {
   const res = await API.patch('/assessment/assessment-progress/complete');
   return res.data.data;
 }
+
+
+export async function fetchUserDetailsById() {
+  const res = await API.get(`/assessment/assessment-progress/user`);
+  return res.data.data.data;
+}

@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchUserProgress } from '../services/userAssessmentProgressService'
+import { fetchUserDetailsById } from "../services/userAssessmentProgressService";
 export default function WelcomePage() {
 
     const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [userDetails, setUserDetails] = useState(null);
 
+   useEffect(() => {
+      const getUserDetails = async () => {
+        const userDetails = await fetchUserDetailsById();
+        setUserDetails(userDetails);
+      };
+      getUserDetails();
+    }, []);
   useEffect(() => {
     fetchUserProgress()
       .then((progress) => {
-        console.log("User progress:", progress);
         if (progress?.currentStage === null) {
           navigate("/report"); // redirect if already done
         } else {
@@ -30,7 +38,7 @@ export default function WelcomePage() {
       <div className="bg-white rounded-2xl shadow-lg max-w-7xl w-full p-8">
         {/* Greeting */}
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Dear <span className="text-blue-600">Sanket Gaikwad</span>
+          Dear <span className="text-blue-600">{userDetails?.fullName}</span>
         </h2>
 
         {/* Intro */}

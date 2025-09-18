@@ -9,6 +9,7 @@ export default function CareerOptions({ economic_status = "weak", language = "mr
   useEffect(() => {
     async function fetchCareers() {
       try {
+        
         const scoresRes = await getScores();
         if (scoresRes.data?.success) {
           const recRes = await getRecommendedCareers(
