@@ -25,14 +25,20 @@ export default function AptitudeQuestion({ data, value, onChange }) {
   return (
     <div className="mt-6">
       {/* English + Marathi */}
-      {enQuestion && <h3 className="text-xl font-semibold text-gray-700">{enQuestion}</h3>}
-      {mrQuestion && <h4 className="text-lg font-semibold text-gray-600 mb-2">{mrQuestion}</h4>}
+      {enQuestion && (
+        <h3 className="text-xl font-semibold text-gray-700">{enQuestion}</h3>
+      )}
+      {mrQuestion && (
+        <h4 className="text-lg font-semibold text-gray-600 mb-2">
+          {mrQuestion}
+        </h4>
+      )}
 
       {/* Image if exists */}
       {questionImage && (
         <div className="my-3">
           <img
-            src={questionImage}
+            src={`${import.meta.env.VITE_API_BASE_URL}/assessment/static/${questionImage}`}
             alt="Question illustration"
             className="max-h-64 object-contain"
           />
