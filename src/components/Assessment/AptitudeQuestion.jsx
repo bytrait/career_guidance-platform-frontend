@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import Spinner from "../common/Spinner";
+
 export default function AptitudeQuestion({ data, value, onChange }) {
   if (!data) return null;
   const options = Array.isArray(data.options) ? data.options : [];
@@ -22,6 +25,13 @@ export default function AptitudeQuestion({ data, value, onChange }) {
     }
   }
 
+  const [imgLoading, setImgLoading] = useState(true);
+
+  // Reset loading whenever question changes
+  useEffect(() => {
+    setImgLoading(true);
+  }, [data.id, questionImage]);
+
   return (
     <div className="mt-6">
       {/* English + Marathi */}
@@ -34,13 +44,22 @@ export default function AptitudeQuestion({ data, value, onChange }) {
         </h4>
       )}
 
-      {/* Image if exists */}
+      {/* Image with loading spinner */}
       {questionImage && (
-        <div className="my-3">
+        <div className="my-3 flex justify-center items-center min-h-[200px]">
+          {imgLoading && (
+            <div className="flex items-center justify-center h-48 w-full">
+              <Spinner message="Loading image..." size="sm" />
+            </div>
+          )}
           <img
             src={`${import.meta.env.VITE_API_BASE_URL}/assessment/static/${questionImage}`}
             alt="Question illustration"
-            className="max-h-64 object-contain"
+            className={`max-h-64 object-contain transition-opacity duration-300 ${
+              imgLoading ? "opacity-0" : "opacity-100"
+            }`}
+            onLoad={() => setImgLoading(false)}
+            onError={() => setImgLoading(false)}
           />
         </div>
       )}
