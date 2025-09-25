@@ -24,6 +24,7 @@ import {
 
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import Spinner from "../components/common/Spinner";
 
 export default function AssessmentPage() {
 
@@ -36,6 +37,7 @@ export default function AssessmentPage() {
     getFromLocalStorage("assessment_answers") || {}
   );
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showInterestInstructions, setShowInterestInstructions] =
@@ -44,7 +46,7 @@ export default function AssessmentPage() {
     useState(false);
   const [showAptitudeInstructions, setShowAptitudeInstructions] =
     useState(false);
-  const [showOceanInstructions, setShowOceanInstructions] = useState(false); // NEW
+  const [showOceanInstructions, setShowOceanInstructions] = useState(false);
 
   useEffect(() => {
     fetchUserProgress()
@@ -168,17 +170,22 @@ export default function AssessmentPage() {
   };
 
   const finishAssessment = async () => {
+    setSubmitting(true); // start spinner
+
     await submitScoresToAPI();
     saveToLocalStorage("assessment_answers", {});
 
     if (assessmentType === "OCEAN") {
-      setShowCompletionModal(true);
       await updateUserProgress("RIASEC");
+      setSubmitting(false);
+      setShowCompletionModal(true);
     } else if (assessmentType === "RIASEC") {
-      setShowRiasecCompletionModal(true);
       await updateUserProgress("APTITUDE");
+      setSubmitting(false);
+      setShowRiasecCompletionModal(true);
     } else {
       await completeUserProgress();
+      setSubmitting(false);
       setAssessmentType("COMPLETED");
     }
   };
@@ -229,8 +236,13 @@ export default function AssessmentPage() {
     return <AptitudeInstructions onStart={startAptitudeTest} />;
   }
 
-  if (loading) return <p className="text-center mt-8">Loading questions...</p>;
-
+if (loading || submitting) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Spinner />
+      </div>
+    );
+  }
   return (
     <div className="p-6 w-full max-w-7xl mx-auto flex flex-col min-h-[80vh]">
       <div className="mb-8">
