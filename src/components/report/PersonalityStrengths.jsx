@@ -21,12 +21,13 @@ const TRAIT_JSON_KEY = {
   N: "Neuroticism",
 };
 
+// Display names for chart in English + Marathi
 const TRAIT_DISPLAY = {
-  O: "Openness",
-  C: "Conscientiousness",
-  E: "Extroversion",
-  A: "Agreeableness",
-  N: "Neuroticism",
+  O: { en: "Openness", mr: "मोकळेपणा" },
+  C: { en: "Conscientiousness", mr: "कर्मठपणा" },
+  E: { en: "Extroversion", mr: "बहिर्मुखता" },
+  A: { en: "Agreeableness", mr: "सहमतता" },
+  N: { en: "Neuroticism", mr: "भावनिक अस्थिरता" },
 };
 
 // Helper to get category based on score
@@ -49,7 +50,7 @@ function getCategory(traitJsonKey, score, lang = "en") {
     const [min, max] = String(cat.range).split("-").map(Number);
     if (!Number.isNaN(min) && !Number.isNaN(max) && score >= min && score <= max) {
       return {
-        label: cat.label,
+        label: (cat.label && (cat.label[lang] || cat.label["en"])) || null,
         summary: (cat.summary && (cat.summary[lang] || cat.summary["en"])) || null,
       };
     }
@@ -74,7 +75,7 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
         const item = oceanScores.find((s) => s.traitOrCategoryCode === code);
         if (item) {
           return {
-            name: TRAIT_DISPLAY[code] || TRAIT_JSON_KEY[code] || item.traitOrCategoryCode,
+            name: TRAIT_DISPLAY[code]?.[language] || TRAIT_JSON_KEY[code] || item.traitOrCategoryCode,
             value: item.score,
           };
         }
@@ -89,7 +90,8 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
       const jsonKey = TRAIT_JSON_KEY[item.traitOrCategoryCode];
       const cat = getCategory(jsonKey, item.score, language);
       if (cat) {
-        const displayName = TRAIT_DISPLAY[item.traitOrCategoryCode] || jsonKey;
+        const displayName =
+          TRAIT_DISPLAY[item.traitOrCategoryCode]?.[language] || jsonKey;
         acc[displayName] = {
           label: cat.label,
           summary: cat.summary,
@@ -112,13 +114,16 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-semibold text-gray-800">
-              Your Top Personality Strengths
+              {language === "mr"
+                ? "तुमचे प्रमुख व्यक्तिमत्त्वाचे गुण"
+                : "Your Top Personality Strengths"}
             </h2>
             <p className="text-gray-600 mt-3">
-              The following section shows your personality traits based on your responses.
+              {language === "mr"
+                ? "खालील विभाग तुमच्या प्रतिसादांवर आधारित व्यक्तिमत्त्वाचे गुण दाखवतो."
+                : "The following section shows your personality traits based on your responses."}
             </p>
           </div>
-          {/* 🔹 Removed local language toggle — handled in ReportPage */}
         </div>
       </div>
 
@@ -127,7 +132,9 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
         {/* Left side - Accordions */}
         <div className="space-y-4">
           {Object.keys(accordions).length === 0 && (
-            <div className="text-gray-500">No OCEAN data available yet.</div>
+            <div className="text-gray-500">
+              {language === "mr" ? "अद्याप कोणतेही OCEAN डेटा उपलब्ध नाही." : "No OCEAN data available yet."}
+            </div>
           )}
 
           {Object.entries(accordions).map(([trait, info]) => {
@@ -152,7 +159,9 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
                       size={18}
                     />
                     <div className="text-left">
-                      <div className="font-semibold text-gray-800">{info.label}</div>
+                      <div className="font-semibold text-gray-800">
+                        {info.label}
+                      </div>
                     </div>
                   </div>
                 </button>
@@ -165,7 +174,7 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
                   style={{ maxHeight: isOpen ? "400px" : "0px" }}
                 >
                   <div className="text-gray-700">
-                    {info.summary || "No summary available."}
+                    {info.summary || (language === "mr" ? "सारांश उपलब्ध नाही." : "No summary available.")}
                   </div>
                 </div>
               </div>

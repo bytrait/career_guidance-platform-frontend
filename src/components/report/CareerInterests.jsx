@@ -11,23 +11,25 @@ import {
 import { ChevronRight } from "lucide-react";
 import riasecData from "../../data/riasec_interests.json";
 
-// Map codes to full names
-const RIASEC_NAMES = {
-  R: "Realistic",
-  I: "Investigative",
-  A: "Artistic",
-  S: "Social",
-  E: "Enterprising",
-  C: "Conventional",
+// Localized UI text
+const UI_TEXT = {
+  en: {
+    heading: "Your career interests",
+    description: "These are your RIASEC scores showing your strongest interests.",
+  },
+  mr: {
+    heading: "तुमचे करिअर आवडी",
+    description: "ही तुमची RIASEC गुण आहेत जे तुमच्या सर्वात मजबूत आवडी दर्शवतात.",
+  },
 };
 
-// Helper to get summary from JSON
-function getSummary(code, lang = "en") {
+// Helper to get summary + name from JSON
+function getTraitInfo(code, lang = "en") {
   const trait = riasecData.riasec.find((t) => t.code === code);
   if (!trait) return null;
   return {
-    name: trait.name,
-    summary: trait.summary[lang] || trait.summary.en,
+    name: trait.name?.[lang] || trait.name?.en || code,
+    summary: trait.summary?.[lang] || trait.summary?.en || "",
   };
 }
 
@@ -44,12 +46,14 @@ export default function CareerInterests({ scores = [], language = "en" }) {
     );
 
     // Radar chart data
-    const chartData = Object.keys(RIASEC_NAMES).map((code) => {
-      const item = riasecScores.find((s) => s.traitOrCategoryCode === code);
+    const chartData = riasecData.riasec.map((trait) => {
+      const item = riasecScores.find(
+        (s) => s.traitOrCategoryCode === trait.code
+      );
       return {
-        subject: RIASEC_NAMES[code],
+        subject: trait.name?.[language] || trait.name?.en,
         value: item ? item.score : 0,
-        code,
+        code: trait.code,
       };
     });
     setData(chartData);
@@ -59,7 +63,7 @@ export default function CareerInterests({ scores = [], language = "en" }) {
       .sort((a, b) => b.score - a.score)
       .slice(0, 3)
       .map((item) => {
-        const info = getSummary(item.traitOrCategoryCode, language);
+        const info = getTraitInfo(item.traitOrCategoryCode, language);
         return {
           code: item.traitOrCategoryCode,
           score: item.score,
@@ -80,10 +84,10 @@ export default function CareerInterests({ scores = [], language = "en" }) {
       <div className="max-w-7xl w-full flex items-center justify-between">
         <div>
           <h2 className="text-4xl font-bold text-gray-900">
-            Your career interests
+            {UI_TEXT[language]?.heading || UI_TEXT.en.heading}
           </h2>
           <p className="text-gray-600 mt-2">
-            These are your RIASEC scores showing your strongest interests.
+            {UI_TEXT[language]?.description || UI_TEXT.en.description}
           </p>
         </div>
         {/* 🔹 Language toggle removed — handled in ReportPage */}

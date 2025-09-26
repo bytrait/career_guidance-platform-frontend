@@ -51,45 +51,65 @@ export default function ReportPage() {
 
   return (
     <>
-      {/* 🔹 Language Toggle UI */}
-      <div className="flex justify-end gap-2 pr-[350px] py-5">
-        <button
-          onClick={() => setLanguage("en")}
-          className={`px-3 py-1 rounded-full text-sm ${
-            language === "en" ? "bg-blue-600 text-white" : "bg-white border text-gray-700"
-          }`}
-        >
-          English
-        </button>
-        <button
-          onClick={() => setLanguage("mr")}
-          className={`px-3 py-1 rounded-full text-sm ${
-            language === "mr" ? "bg-blue-600 text-white" : "bg-white border text-gray-700"
-          }`}
-        >
-          मराठी
-        </button>
+      {/* 🔹 Language Toggle UI - Made responsive */}
+      <div className="flex justify-end gap-2 px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
+        <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm p-1.5 rounded-full shadow-sm border">
+          <button
+            onClick={() => setLanguage("en")}
+            className={`px-3 py-1.5 text-xs sm:text-sm rounded-full transition-colors ${
+              language === "en" 
+                ? "bg-blue-600 text-white shadow-md" 
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            English
+          </button>
+          <button
+            onClick={() => setLanguage("mr")}
+            className={`px-3 py-1.5 text-xs sm:text-sm rounded-full transition-colors ${
+              language === "mr" 
+                ? "bg-blue-600 text-white shadow-md" 
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            मराठी
+          </button>
+        </div>
       </div>
 
-      {/* 🔹 Existing components */}
-      <PersonalityStrengths scores={scores} language={language} />
-      <CareerInterests scores={scores} language={language} />
-      {/* 🔹 New Horizontal Career Match Chart */}
-      <CareerMatchChart topCareers={topCareers} language={language} />
-      <CareerOptions
-        scores={scores}
-        language={language}
-        onSelectCareer={handleSelectCareer}
-      />
+      {/* Main content container */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        {/* Personality Strengths Section */}
+        <section className="mb-12 sm:mb-16">
+          <PersonalityStrengths scores={scores} language={language} />
+        </section>
 
-      
+        {/* Career Interests Section */}
+        <section className="mb-12 sm:mb-16">
+          <CareerInterests scores={scores} language={language} />
+        </section>
 
-      {/* 🔹 Career Path (when user selects one option) */}
-      {selectedCareer && (
-        <div ref={careerPathRef}>
-          <CareerPath selectedCareer={selectedCareer} language={language} />
-        </div>
-      )}
+        {/* Career Match Chart Section */}
+        <section className="mb-12 sm:mb-16">
+          <CareerMatchChart topCareers={topCareers} language={language} />
+        </section>
+
+        {/* Career Options Section */}
+        <section className="mb-12 sm:mb-16">
+          <CareerOptions
+            scores={scores}
+            language={language}
+            onSelectCareer={handleSelectCareer}
+          />
+        </section>
+
+        {/* Career Path Section (conditional) */}
+        {selectedCareer && (
+          <section ref={careerPathRef} className="mt-16">
+            <CareerPath selectedCareer={selectedCareer} language={language} />
+          </section>
+        )}
+      </div>
     </>
   );
 }
