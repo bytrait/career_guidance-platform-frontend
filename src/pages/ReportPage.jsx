@@ -108,6 +108,8 @@ export default function ReportPage() {
         </section> */}
 
         {/* Career Options Section */}
+        
+        {economicStatus && language ? (
         <section className="mb-12 sm:mb-16">
           <CareerOptions
             // scores={scores}
@@ -116,6 +118,8 @@ export default function ReportPage() {
             onSelectCareer={handleSelectCareer}
           />
         </section>
+        ) : null}
+
 
         {/* Career Path Section (conditional) */}
         {selectedCareer && (

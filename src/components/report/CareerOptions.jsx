@@ -12,42 +12,54 @@ import {
   CartesianGrid,
   LabelList
 } from "recharts";
+import Spinner from "../common/Spinner";
 
 export default function CareerOptions({ economicStatus, language, onSelectCareer }) {
   const [careers, setCareers] = useState([]);
   const [userScores, setUserScores] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchCareers() {
-      try {
-        const scoresRes = await getScores();
-        if (scoresRes.data?.success) {
-          const user = scoresRes.data.data; // { R, I, A, S, E, C }
-          setUserScores(user);
+  const fetchCareers = async () => {
+    console.log("Fetching careers...")
+    setLoading(true);
+    try {
+      const scoresRes = await getScores();
+      if (scoresRes.data?.success) {
+        const user = scoresRes.data.data; // { R, I, A, S, E, C }
+        setUserScores(user);
 
-          const recRes = await getRecommendedCareers(user, economicStatus, language);
-          console.log(recRes)
-          if (recRes.data?.recommendations) {
-            let recs = [];
-            if (economicStatus === "weak") {
-              recs = [
-                ...(recRes.data.recommendations.vocational || []),
-                ...(recRes.data.recommendations.professional || []),
-              ];
-            } else {
-              recs = recRes.data.recommendations.professional || [];
-            }
-            setCareers(recs);
+        const recRes = await getRecommendedCareers(user, economicStatus, language);
+        
+        if (recRes.data?.recommendations) {
+          let recs = [];
+          if (economicStatus === "weak") {
+            recs = [
+              ...(recRes.data.recommendations.vocational || []),
+              ...(recRes.data.recommendations.professional || []),
+            ];
+          } else {
+            recs = recRes.data.recommendations.professional || [];
           }
+          setCareers(recs);
         }
-      } catch (err) {
-        console.error("Failed to fetch careers", err);
-      } finally {
-        setLoading(false);
       }
+    } catch (err) {
+      console.error("Failed to fetch careers", err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Initial fetch
+  useEffect(() => {
     fetchCareers();
+  }, []);
+
+  // Refetch when language or economic status changes
+  useEffect(() => {
+    if (userScores) { // Only refetch if we already have initial data
+      fetchCareers();
+    }
   }, [economicStatus, language]);
 
   // Prepare chart data with proper score processing
@@ -113,16 +125,26 @@ export default function CareerOptions({ economicStatus, language, onSelectCareer
       </div>
 
       {/* Loading */}
-      {loading && (
+      {/* {loading && (
         <div className="mt-10 text-gray-500">
           {language === "mr"
             ? "शिफारस केलेली करिअर लोड करत आहे..."
             : "Loading recommended careers..."}
         </div>
-      )}
+      )} */}
 
       {/* Chart */}
-      {!loading && chartData.length > 0 && (
+      {loading ? (
+        <div className="w-full flex justify-center items-center py-12">
+          {/* <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div> */}
+          <span className="ml-3 text-gray-600">
+            <Spinner/>
+            {language === "mr" 
+              ? "करिअर शिफारसी लोड करत आहे..." 
+              : "Loading career recommendations..."}
+          </span>
+        </div>
+      ) : chartData.length > 0 ? (
         <div className="w-full max-w-7xl mt-10">
           <h3 className="text-xl font-bold text-center mb-4">
             {language === "mr"
@@ -178,6 +200,12 @@ export default function CareerOptions({ economicStatus, language, onSelectCareer
             </BarChart>
           </ResponsiveContainer>
         </div>
+      ) : (
+        <div className="w-full text-center py-12 text-gray-500">
+          {language === "mr" 
+            ? "कोणत्याही करिअर शिफारसी आढळल्या नाहीत" 
+            : "No career recommendations found"}
+        </div>
       )}
 
       {/* Career Cards */}
@@ -215,5 +243,5 @@ export default function CareerOptions({ economicStatus, language, onSelectCareer
         </div>
       )}
     </div>
-  );
+  )
 }
