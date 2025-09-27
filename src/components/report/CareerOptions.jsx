@@ -97,7 +97,7 @@ export default function CareerOptions({ economicStatus, language, onSelectCareer
   };
 
   const chartData = prepareChartData();
-
+  console.log(chartData)
   return (
     <div className="w-full min-h-screen p-6 flex flex-col items-center">
       {/* Header */}
