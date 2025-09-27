@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { savePreference } from "../services/preferenceService";
 import { useNavigate } from "react-router-dom";
 
 import congrasIms from "../assets/congrats.png"
+import { fetchUserDetailsById } from "../services/userAssessmentProgressService";
 
 export default function CongratulationsPage() {
   const [preferredLanguage, setPreferredLanguage] = useState("en");
@@ -10,6 +11,16 @@ export default function CongratulationsPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+
+  const [userDetails, setUserDetails] = useState(null);
+
+    useEffect(() => {
+      const getUserDetails = async () => {
+        const userDetails = await fetchUserDetailsById();
+        setUserDetails(userDetails);
+      };
+      getUserDetails();
+    }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,7 +48,7 @@ export default function CongratulationsPage() {
 
       {/* Heading */}
       <h1 className="text-3xl md:text-4xl font-bold mb-4 text-center">
-        Congratulations, Pratik!
+        Congratulations, {userDetails?.fullName}!
       </h1>
 
       {/* Subheading */}
@@ -47,7 +58,7 @@ export default function CongratulationsPage() {
 
       {/* Paragraphs from screenshot */}
       <p className="text-center max-w-2xl mb-4">
-        Congratulations Pratik for taking the first step towards a successful,
+        Congratulations {userDetails?.fullName} for taking the first step towards a successful,
         satisfying and meaningful career.
       </p>
       <p className="text-center  max-w-2xl mb-8">
