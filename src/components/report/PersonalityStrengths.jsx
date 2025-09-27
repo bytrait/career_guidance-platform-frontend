@@ -183,14 +183,50 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
         </div>
 
         {/* Right side - Chart */}
-        <div className="bg-white p-4">
+        <div className="bg-white p-4 rounded-xl">
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 20 }}>
-              <CartesianGrid strokeDasharray="5 5" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" fill="#2563eb" radius={[6, 6, 0, 0]} />
+              <CartesianGrid strokeDasharray="5 5" stroke="#f0f0f0" />
+              <XAxis 
+                dataKey="name" 
+                tick={{ fontSize: 12, fill: '#4b5563' }} 
+                axisLine={{ stroke: '#e5e7eb' }}
+                tickLine={false}
+              />
+              <YAxis 
+                tick={{ fontSize: 12, fill: '#4b5563' }}
+                axisLine={{ stroke: '#e5e7eb' }}
+                tickLine={false}
+              />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'white',
+                  borderRadius: '0.5rem',
+                  border: '1px solid #e5e7eb',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}
+              />
+              <Bar 
+                dataKey="value" 
+                fill="#2563eb" 
+                radius={[6, 6, 0, 0]}
+                className="transition-colors duration-200 hover:fill-[#1d4ed8]"
+                style={{
+                  cursor: 'pointer',
+                }}
+              >
+                {chartData.map((entry, index) => (
+                  <rect
+                    key={`bar-${index}`}
+                    x={entry.x}
+                    y={entry.y}
+                    width={entry.width}
+                    height={entry.height}
+                    fill="#2563eb"
+                    className="transition-colors duration-200 hover:fill-[#1d4ed8]"
+                  />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>

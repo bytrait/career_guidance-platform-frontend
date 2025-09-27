@@ -105,7 +105,6 @@ export default function CareerPath({ selectedCareer, language = "en" }) {
           {/* RIGHT: details */}
           <div className="bg-white rounded-xl border border-gray-200 p-6 col-span-4 lg:col-span-1">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">🎯</div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900">
                   {(selectedCareer?.title && (selectedCareer.title[language] || selectedCareer.title.value)) || "Career Path"}

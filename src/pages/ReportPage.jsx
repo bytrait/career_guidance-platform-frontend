@@ -10,33 +10,42 @@ import { getUserRiasecScores, getTopCareers } from "../utils/riasecUtils";
 
 // ✅ Pre-generated JSON file (from your Excel) with EN + MR fields
 import careerFields from "../data/career_fields.json";
+import { getPreference } from "../services/preferenceService";
+import AptitudeChart from "../components/report/AptitudeChart";
 
 export default function ReportPage() {
   const [scores, setScores] = useState([]);
   const [selectedCareer, setSelectedCareer] = useState(null);
   const [language, setLanguage] = useState("en");
+  const [economicStatus, setEconomicStatus] = useState(null);
   const [topCareers, setTopCareers] = useState([]);
 
   const careerPathRef = useRef(null);
+  async function fetchScores() {
+    try {
+      const res = await getScores();
+      if (res?.data?.success) {
+        setScores(res.data.data);
 
-  useEffect(() => {
-    async function fetchScores() {
-      try {
-        const res = await getScores();
-        if (res?.data?.success) {
-          setScores(res.data.data);
+        // 🔹 Extract RIASEC scores
+        const riasec = getUserRiasecScores(res.data.data);
 
-          // 🔹 Extract RIASEC scores
-          const riasec = getUserRiasecScores(res.data.data);
-
-          // 🔹 Calculate top 10 career matches
-          const top = getTopCareers(riasec, careerFields, 10);
-          setTopCareers(top);
-        }
-      } catch (err) {
-        console.error("Failed to fetch scores", err);
+        // 🔹 Calculate top 10 career matches
+        const top = getTopCareers(riasec, careerFields, 10);
+        setTopCareers(top);
       }
+    } catch (err) {
+      console.error("Failed to fetch scores", err);
     }
+  }
+
+  async function fetchPreference() {
+    const res = await getPreference()
+    setLanguage(res.preferredLanguage)
+    setEconomicStatus(res.economicStatus)
+  }
+  useEffect(() => {
+    fetchPreference();
     fetchScores();
   }, []);
 
@@ -89,15 +98,20 @@ export default function ReportPage() {
           <CareerInterests scores={scores} language={language} />
         </section>
 
-        {/* Career Match Chart Section */}
         <section className="mb-12 sm:mb-16">
-          <CareerMatchChart topCareers={topCareers} language={language} />
+          <AptitudeChart scores={scores} language={language} />
         </section>
+
+        {/* Career Match Chart Section */}
+        {/* <section className="mb-12 sm:mb-16">
+          <CareerMatchChart topCareers={topCareers} language={language} />
+        </section> */}
 
         {/* Career Options Section */}
         <section className="mb-12 sm:mb-16">
           <CareerOptions
-            scores={scores}
+            // scores={scores}
+            economicStatus={economicStatus}
             language={language}
             onSelectCareer={handleSelectCareer}
           />

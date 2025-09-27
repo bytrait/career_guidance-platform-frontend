@@ -220,7 +220,7 @@ export default function AssessmentPage() {
 
   // Redirect to report if done
   if (assessmentType === "COMPLETED") {
-    navigation("/report");
+    navigation("/congratulations");
   }
 
   // Show Ocean Instructions first
