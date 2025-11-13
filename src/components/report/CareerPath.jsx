@@ -3,6 +3,10 @@ import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FaMapMarkerAlt } from "react-icons/fa";
 
+import styles from "../CareerContent/CareerContent.module.css";
+import SegmentedContent from "../CareerContent/SegmentedContent";
+
+
 export default function CareerPath({ selectedCareer, language = "en" }) {
   const [activeStep, setActiveStep] = useState(1);
   const [steps, setSteps] = useState([]);
@@ -33,7 +37,7 @@ export default function CareerPath({ selectedCareer, language = "en" }) {
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-5 lg:grid-cols-2 lg:gap-8">
+        <div className=" grid-cols-5 lg:grid-cols-2 lg:gap-8">
           {/* LEFT: timeline */}
           <div className="relative col-span-1 lg:col-span-1">
             <div className="block absolute top-4 bottom-4 w-1 bg-blue-100 left-10 lg:left-14" />
@@ -126,14 +130,10 @@ export default function CareerPath({ selectedCareer, language = "en" }) {
                   </h4>
                 </div>
 
-                <ul className="list-disc list-inside text-gray-700 space-y-2">
-                  {(steps[activeStep - 1]?.description
-                    ? [steps[activeStep - 1].description]
-                    : steps[activeStep - 1]?.details || []
-                  ).map((d, idx) => (
-                    <li key={idx} className="text-gray-700">{d}</li>
-                  ))}
-                </ul>
+                {/* <div className={styles.contentContainer}
+                dangerouslySetInnerHTML ={{ __html: steps[activeStep - 1]?.description || "" }}   
+                /> */}
+                <SegmentedContent html={steps[activeStep - 1]?.description || ""} />
 
                 {/* Mobile prev/next */}
                 <div className="mt-6 flex justify-center gap-4 lg:hidden">

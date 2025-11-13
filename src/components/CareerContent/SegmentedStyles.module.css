@@ -1,0 +1,41 @@
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.cardTitle {
+  font-family: "Inter", sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-bottom: 1rem;
+}
+
+.cardContent {
+  color: #374151;
+  line-height: 1.75;
+}
+
+/* Color accents */
+.blue {
+  border-left: 6px solid #3b82f6;
+}
+.green {
+  border-left: 6px solid #10b981;
+}
+.purple {
+  border-left: 6px solid #8b5cf6;
+}
+.orange {
+  border-left: 6px solid #f97316;
+}
