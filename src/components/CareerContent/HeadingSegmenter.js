@@ -1,11 +1,10 @@
-// src/components/career/HeadingSegmenter.js
 import { parseDocument } from "htmlparser2";
 import { DomUtils } from "htmlparser2";
 import { render as renderHtml } from "dom-serializer";
 
 /**
  * Splits HTML into sections based on headings (h1–h4).
- * Each section = { heading: "Title", content: "<p>..</p><ul>..</ul>" }
+ * Each section = { headingHtml: "<i class='bi ...'></i> Title", content: "<p>..</p><ul>..</ul>" }
  */
 export function segmentByHeadings(htmlString) {
   if (!htmlString || typeof htmlString !== "string") return [];
@@ -18,11 +17,14 @@ export function segmentByHeadings(htmlString) {
 
   for (const node of children) {
     if (node.type === "tag" && /^h[1-4]$/i.test(node.name)) {
-      // Push previous section if exists
+      // Close previous section
       if (currentSection) sections.push(currentSection);
 
+      // NEW: Preserve inner HTML of heading
+      const headingInnerHtml = renderHtml(node.children).trim();
+
       currentSection = {
-        heading: DomUtils.textContent(node).trim(),
+        heading: headingInnerHtml,   // <-- HTML preserved, icons included
         content: "",
       };
     } else if (currentSection) {
@@ -30,7 +32,6 @@ export function segmentByHeadings(htmlString) {
     }
   }
 
-  // Add last section
   if (currentSection) sections.push(currentSection);
 
   return sections;

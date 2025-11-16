@@ -14,15 +14,16 @@ export default function SegmentedContent({ html }) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto bg-gray-50 p-8 rounded-2xl">
+    <div className="w-full mx-auto">
       {sections.map((sec, idx) => (
         <SectionCard
           key={idx}
-          title={sec.heading}
+          title={sec.heading}  // must be HTML, not text
           color={colors[idx % colors.length]}
         >
           {parse(sec.content)}
         </SectionCard>
+  
       ))}
     </div>
   );

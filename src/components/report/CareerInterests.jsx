@@ -79,7 +79,7 @@ export default function CareerInterests({ scores = [], language = "en" }) {
   };
 
   return (
-    <div className="w-full p-6 flex flex-col items-center">
+    <div className="w-full p-6 flex flex-col items-center bg-gray-50 border border-gray-200 rounded-sm"> 
       {/* Header */}
       <div className="max-w-7xl w-full flex items-center justify-between">
         <div>
@@ -94,7 +94,7 @@ export default function CareerInterests({ scores = [], language = "en" }) {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl w-full mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="max-w-7xl w-full mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
         {/* Left side - Accordions */}
         <div className="space-y-4">
           {accordions.map((item) => {
@@ -102,7 +102,7 @@ export default function CareerInterests({ scores = [], language = "en" }) {
             return (
               <div
                 key={item.code}
-                className="bg-white rounded-xl overflow-hidden border border-gray-200"
+                className="bg-white rounded-xl overflow-hidden border border-gray-300"
               >
                 <button
                   type="button"
@@ -138,7 +138,7 @@ export default function CareerInterests({ scores = [], language = "en" }) {
         </div>
 
         {/* Right side - Radar Chart */}
-        <div className="bg-white shadow rounded-xl p-5 flex flex-col items-center">
+        <div className="p-5 flex flex-col items-center">
           <ResponsiveContainer width="100%" height={350}>
             <RadarChart data={data}>
               <PolarGrid />

@@ -1,132 +1,167 @@
-import React, { useRef, useState, useEffect } from "react";
-import PersonalityStrengths from "../components/report/PersonalityStrengths";
-import CareerInterests from "../components/report/CareerInterests";
-import CareerOptions from "../components/report/CareerOptions";
-import CareerPath from "../components/report/CareerPath";
-import CareerMatchChart from "../components/report/CareerMatchChart";
+import React, { useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+import {
+  setScores,
+  setLanguage,
+  setEconomicStatus,
+  setRecommendedCareers,
+  setSelectedCareer,
+} from "../store/reportSlice";
 
 import { getScores } from "../services/assessmentService";
-import { getUserRiasecScores, getTopCareers } from "../utils/riasecUtils";
-
-// ✅ Pre-generated JSON file (from your Excel) with EN + MR fields
-import careerFields from "../data/career_fields.json";
 import { getPreference } from "../services/preferenceService";
+import { getRecommendedCareers } from "../services/careerService";
+
+import PersonalityStrengths from "../components/report/PersonalityStrengths";
+import CareerInterests from "../components/report/CareerInterests";
 import AptitudeChart from "../components/report/AptitudeChart";
+import CareerOptions from "../components/report/CareerOptions";
+import CareerPath from "../components/report/CareerPath";
+import Spinner from "../components/common/Spinner";
+import { useNavigate } from "react-router-dom";
 
 export default function ReportPage() {
-  const [scores, setScores] = useState([]);
-  const [selectedCareer, setSelectedCareer] = useState(null);
-  const [language, setLanguage] = useState("en");
-  const [economicStatus, setEconomicStatus] = useState(null);
-  const [topCareers, setTopCareers] = useState([]);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+
+  const {
+    scores,
+    language,
+    economicStatus,
+    selectedCareer,
+    recommendedCareers,
+  } = useSelector((state) => state.report);
 
   const careerPathRef = useRef(null);
-  async function fetchScores() {
-    try {
-      const res = await getScores();
-      if (res?.data?.success) {
-        setScores(res.data.data);
 
-        // 🔹 Extract RIASEC scores
-        const riasec = getUserRiasecScores(res.data.data);
-
-        // 🔹 Calculate top 10 career matches
-        const top = getTopCareers(riasec, careerFields, 10);
-        setTopCareers(top);
-      }
-    } catch (err) {
-      console.error("Failed to fetch scores", err);
-    }
-  }
-
-  async function fetchPreference() {
-    const res = await getPreference()
-    setLanguage(res.preferredLanguage)
-    setEconomicStatus(res.economicStatus)
-  }
+  // Load user preference + scores
   useEffect(() => {
-    fetchPreference();
-    fetchScores();
+    async function load() {
+      try {
+        const pref = await getPreference();
+        if (!language) {
+          dispatch(setLanguage(pref.preferredLanguage || "en"));
+        }
+
+        if (!economicStatus) {
+          dispatch(setEconomicStatus(pref.economicStatus || null));
+        }
+
+
+        const scoreRes = await getScores();
+        if (scoreRes.data?.success) {
+          dispatch(setScores(scoreRes.data.data));
+        }
+      } catch (err) {
+        console.error("Failed initial load", err);
+      }
+    }
+
+    load();
   }, []);
 
-  const handleSelectCareer = (career) => {
-    setSelectedCareer(career);
-    setTimeout(() => {
-      if (careerPathRef.current) {
-        careerPathRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  // Fetch recommended careers
+  useEffect(() => {
+    async function loadCareers() {
+      if (!scores || scores.length === 0 || !language || !economicStatus) return;
+
+      try {
+        const res = await getRecommendedCareers(scores, economicStatus, language);
+
+        let recs = [];
+        if (res.data?.recommendations) {
+          if (economicStatus === "weak") {
+            recs = [
+              ...(res.data.recommendations.vocational || []),
+              ...(res.data.recommendations.professional || []),
+            ];
+          } else {
+            recs = res.data.recommendations.professional || [];
+          }
+        }
+
+        dispatch(setRecommendedCareers(recs));
+      } catch (err) {
+        console.error("Failed to fetch recommendations", err);
       }
-    }, 100);
+    }
+
+    loadCareers();
+  }, [scores, language, economicStatus]);
+
+  const handleSelectCareer = (career) => {
+    dispatch(setSelectedCareer(career));
+    navigate(`/career/${career.id}`);
   };
+
+  // Still loading?
+  const isLoading =
+    !scores.length || !language || !economicStatus || recommendedCareers.length === 0;
 
   return (
     <>
-      {/* 🔹 Language Toggle UI - Made responsive */}
-      <div className="flex justify-end gap-2 px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
-        <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm p-1.5 rounded-full shadow-sm border">
+      {/* LANGUAGE SWITCH */}
+      <div className="flex justify-end px-6 py-4">
+        <div className="flex gap-2 bg-gray-100 p-1 rounded-full">
           <button
-            onClick={() => setLanguage("en")}
-            className={`px-3 py-1.5 text-xs sm:text-sm rounded-full transition-colors ${
-              language === "en" 
-                ? "bg-blue-600 text-white shadow-md" 
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
+            onClick={() => dispatch(setLanguage("en"))}
+            className={`px-3 py-1 rounded-full ${language === "en" ? "bg-blue-600 text-white" : ""
+              }`}
           >
             English
           </button>
+
           <button
-            onClick={() => setLanguage("mr")}
-            className={`px-3 py-1.5 text-xs sm:text-sm rounded-full transition-colors ${
-              language === "mr" 
-                ? "bg-blue-600 text-white shadow-md" 
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
+            onClick={() => dispatch(setLanguage("mr"))}
+            className={`px-3 py-1 rounded-full ${language === "mr" ? "bg-blue-600 text-white" : ""
+              }`}
           >
             मराठी
           </button>
         </div>
       </div>
 
-      {/* Main content container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        {/* Personality Strengths Section */}
-        <section className="mb-12 sm:mb-16">
+      {/* MAIN CONTENT */}
+      <div className="max-w-7xl mx-auto px-6 pb-16">
+
+        {/* Personality */}
+        <section className="mb-16">
           <PersonalityStrengths scores={scores} language={language} />
         </section>
 
-        {/* Career Interests Section */}
-        <section className="mb-12 sm:mb-16">
+        {/* Interests */}
+        <section className="mb-16">
           <CareerInterests scores={scores} language={language} />
         </section>
 
-        <section className="mb-12 sm:mb-16">
+        {/* Aptitude */}
+        <section className="mb-16">
           <AptitudeChart scores={scores} language={language} />
         </section>
 
-        {/* Career Match Chart Section */}
-        {/* <section className="mb-12 sm:mb-16">
-          <CareerMatchChart topCareers={topCareers} language={language} />
-        </section> */}
-
-        {/* Career Options Section */}
-        
-        {economicStatus && language ? (
-        <section className="mb-12 sm:mb-16">
-          <CareerOptions
-            // scores={scores}
-            economicStatus={economicStatus}
-            language={language}
-            onSelectCareer={handleSelectCareer}
-          />
+        {/* Career Options */}
+        <section className="mb-16">
+          {isLoading ? (
+            <div className="flex justify-center">
+              <Spinner />
+            </div>
+          ) : (
+            <CareerOptions
+              economicStatus={economicStatus}
+              language={language}
+              onSelectCareer={handleSelectCareer}
+            />
+          )}
         </section>
-        ) : null}
 
-
-        {/* Career Path Section (conditional) */}
-        {selectedCareer && (
+        {/* Selected Career */}
+        {/* {selectedCareer && (
           <section ref={careerPathRef} className="mt-16">
             <CareerPath selectedCareer={selectedCareer} language={language} />
           </section>
-        )}
+        )} */}
       </div>
     </>
   );

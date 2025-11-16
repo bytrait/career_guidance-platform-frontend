@@ -2,17 +2,8 @@ import React, { useEffect, useState } from "react";
 import { getScores } from "../../services/assessmentService";
 import { getRecommendedCareers } from "../../services/careerService";
 import careerFields from "../../data/career_fields.json";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  LabelList
-} from "recharts";
 import Spinner from "../common/Spinner";
+import CareerMatchChart from "./CareerMatchChart";
 
 export default function CareerOptions({ economicStatus, language, onSelectCareer }) {
   const [careers, setCareers] = useState([]);
@@ -20,7 +11,6 @@ export default function CareerOptions({ economicStatus, language, onSelectCareer
   const [loading, setLoading] = useState(true);
 
   const fetchCareers = async () => {
-    console.log("Fetching careers...")
     setLoading(true);
     try {
       const scoresRes = await getScores();
@@ -29,7 +19,7 @@ export default function CareerOptions({ economicStatus, language, onSelectCareer
         setUserScores(user);
 
         const recRes = await getRecommendedCareers(user, economicStatus, language);
-        
+
         if (recRes.data?.recommendations) {
           let recs = [];
           if (economicStatus === "weak") {
@@ -88,7 +78,7 @@ export default function CareerOptions({ economicStatus, language, onSelectCareer
         // Calculate match score using the transformed userScores
         const fieldScores = field.scores;
         let matchScore = 0;
-        
+
         // Only calculate for RIASEC scores that exist in both userScores and fieldScores
         ['R', 'I', 'A', 'S', 'E', 'C'].forEach(key => {
           if (userScoresObj[key] !== undefined && fieldScores[key] !== undefined) {
@@ -109,7 +99,6 @@ export default function CareerOptions({ economicStatus, language, onSelectCareer
   };
 
   const chartData = prepareChartData();
-  console.log(chartData)
   return (
     <div className="w-full min-h-screen p-6 flex flex-col items-center">
       {/* Header */}
@@ -138,110 +127,91 @@ export default function CareerOptions({ economicStatus, language, onSelectCareer
         <div className="w-full flex justify-center items-center py-12">
           {/* <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div> */}
           <span className="ml-3 text-gray-600">
-            <Spinner/>
-            {language === "mr" 
-              ? "करिअर शिफारसी लोड करत आहे..." 
+            <Spinner />
+            {language === "mr"
+              ? "करिअर शिफारसी लोड करत आहे..."
               : "Loading career recommendations..."}
           </span>
         </div>
       ) : chartData.length > 0 ? (
         <div className="w-full max-w-7xl mt-10">
-          <h3 className="text-xl font-bold text-center mb-4">
-            {language === "mr"
-              ? "श्रेणी अनुरूपता चार्ट"
-              : "Career Category Match Chart"}
-          </h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart
-              data={chartData}
-              layout="vertical"
-              margin={{ top: 20, right: 30, left: 100, bottom: 20 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis 
-                type="number" 
-                domain={[0, 100]}
-                tickFormatter={(value) => `${value}`}
-                tick={{ fontSize: 12 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis 
-                dataKey="name" 
-                type="category" 
-                width={180}
-                tick={{ fontSize: 12 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip 
-                formatter={(value) => [`${value}`, language === "mr" ? "स्कोर" : "Score"]}
-                labelFormatter={(value) => `${value}`}
-                contentStyle={{
-                  borderRadius: '8px',
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                }}
-              />
-              <Bar 
-                dataKey="value" 
-                fill="#3B82F6"
-                radius={[0, 4, 4, 0]}
-                name={language === "mr" ? "स्कोर" : "Score"}
-                animationDuration={1500}
-              >
-                <LabelList 
-                  dataKey="value" 
-                  position="right" 
-                  formatter={(value) => `${value}`}
-                  style={{ fontSize: '12px', fill: '#4b5563' }}
-                />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <CareerMatchChart chartData={chartData} language={language} />
         </div>
       ) : (
         <div className="w-full text-center py-12 text-gray-500">
-          {language === "mr" 
-            ? "कोणत्याही करिअर शिफारसी आढळल्या नाहीत" 
+          {language === "mr"
+            ? "कोणत्याही करिअर शिफारसी आढळल्या नाहीत"
             : "No career recommendations found"}
         </div>
       )}
 
       {/* Career Cards */}
       {!loading && careers.length > 0 && (
-        <div className="max-w-7xl w-full mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {careers.map((career) => (
-            <div
-              key={career.id}
-              className="bg-white rounded-xl shadow hover:shadow-lg p-6 transition flex flex-col justify-between"
-            >
-              <div>
-                <h3 className="text-lg font-semibold text-blue-600 mb-2">
+        <div className="max-w-7xl w-full mt-10 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-7">
+
+          {careers.map((career) => {
+
+            return (
+              <div
+                key={career.id}
+                className="
+            bg-white border border-gray-200 
+            rounded-xl 
+            transition-all duration-300 
+            p-6 flex flex-col justify-between 
+            group
+          "
+              >
+
+                {/* TITLE */}
+                <h3 className="
+              text-xl font-semibold text-gray-900 mb-3 
+              group-hover:text-blue-600 transition
+            ">
                   {career.title?.value}
                 </h3>
-                <p className="text-gray-600 text-sm mb-3">
+
+                {/* DESCRIPTION */}
+                <p className="
+              text-gray-600 text-sm mb-5 
+              line-clamp-3 leading-relaxed
+            ">
                   {career.description?.value}
                 </p>
-              </div>
 
-              <div className="mt-4 flex items-center justify-between">
-                <button
-                  onClick={() => onSelectCareer?.(career)}
-                  className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-sm cursor-pointer"
-                >
-                  {language === "mr" ? "मार्ग पहा" : "Show Path"}
-                </button>
+                {/* BOTTOM SECTION */}
+                <div className="flex items-center justify-between mt-auto">
 
-                <div className="text-sm text-gray-500">
-                  {Math.round((career.similarity ?? 0) * 100) / 100}%{" "}
-                  {language === "mr" ? "जुळणारे" : "match"}
+                  {/* BUTTON */}
+                  <button
+                    onClick={() => onSelectCareer(career)}
+                    className="
+                bg-blue-600 text-white 
+                px-4 py-2 rounded-lg text-sm font-medium 
+                hover:bg-blue-700 transition hover:cursor-pointer
+              "
+                  >
+                    {language === "mr" ? "मार्ग पहा" : "Show Path"}
+                  </button>
+
+                  {/* MATCH BADGE */}
+                  <span
+                    className="
+                bg-blue-50 text-blue-700 
+                px-3 py-1 rounded-full 
+                text-sm font-semibold
+              "
+                  >
+                    {career.similarity}% {language === "mr" ? "जुळणारे" : "match"}
+                  </span>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
+
         </div>
       )}
+
     </div>
   )
 }

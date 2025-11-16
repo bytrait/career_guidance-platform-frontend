@@ -1,41 +1,105 @@
+/* --------------------------
+   CARD BASE DESIGN
+--------------------------- */
 .card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  /* border: 1px solid #e5e7eb; */
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  /* transition: transform 0.2s ease, box-shadow 0.2s ease; */
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-}
+/* .card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+} */
 
+/* Card Title */
 .cardTitle {
   font-family: "Inter", sans-serif;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   font-weight: 600;
-  color: #1e3a8a;
-  margin-bottom: 1rem;
+  color: #0f172a;
+  margin-bottom: 0.75rem;
 }
 
+/* Card Text */
 .cardContent {
   color: #374151;
-  line-height: 1.75;
+  line-height: 1.7;
 }
 
-/* Color accents */
-.blue {
-  border-left: 6px solid #3b82f6;
+/* --------------------------
+   ONLY TWO VARIANTS
+--------------------------- */
+/* NEW — Automatic alternating */
+.card:nth-child(even) {
+  background: #ffffff;                /* White */
 }
-.green {
-  border-left: 6px solid #10b981;
+
+.card:nth-child(odd) {
+  background: #f0f7ff;                /* Light blue shade */
 }
-.purple {
-  border-left: 6px solid #8b5cf6;
+
+.cardTitle i {
+  font-size: 1.25rem;     /* bigger, visible */
+  margin-right: 0.5rem;   /* spacing before text */
+  vertical-align: middle; /* perfect alignment */
+  color: #2563eb;         /* blue tone */
 }
-.orange {
-  border-left: 6px solid #f97316;
+.cardContent li i {
+  font-size: 0.9rem;
+  margin-right: 6px;
+  color: #3b82f6; /* Tailwind blue-500 tone */
+  vertical-align: middle;
+}
+
+
+/* UL bullet styles */
+.cardContent ul {
+  padding-left: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+.cardContent ul li {
+  margin-bottom: 0.5rem;
+  padding-left: 0.3rem;
+  position: relative;
+  font-size: 0.95rem;
+  color: #334155;
+}
+
+.cardContent ul li::marker {
+  color: #3b82f6; /* Blue bullets */
+  font-size: 1.2rem;
+}
+
+
+.cardContent table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.cardContent th {
+  background: #f1f5f9;
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.cardContent td {
+  padding: 10px 14px;
+  border-top: 1px solid #e2e8f0;
+  color: #374151;
+}
+
+.cardContent tr:nth-child(even) td {
+  background: #f8fafc;
 }

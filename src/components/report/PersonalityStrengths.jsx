@@ -8,6 +8,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  LabelList
 } from "recharts";
 import { ChevronRight } from "lucide-react";
 import traitsData from "../../data/personality_traits.json";
@@ -128,109 +129,79 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
       </div>
 
       {/* Content Section */}
-      <div className="max-w-7xl w-full mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8 px-0 sm:px-2">
-        {/* Left side - Accordions */}
-        <div className="space-y-4">
-          {Object.keys(accordions).length === 0 && (
-            <div className="text-gray-500">
-              {language === "mr" ? "अद्याप कोणतेही OCEAN डेटा उपलब्ध नाही." : "No OCEAN data available yet."}
-            </div>
-          )}
+      <div className="max-w-7xl w-full mt-8 grid grid-cols-1 lg:grid-cols-2">
 
+        {/* LEFT PANEL (scrollable, equal height) */}
+        <div className="h-[420px]  pr-2 space-y-4">
           {Object.entries(accordions).map(([trait, info]) => {
             const isOpen = openTrait === trait;
             return (
               <div
                 key={trait}
-                className="bg-white rounded-xl overflow-hidden border border-gray-200"
+                className="bg-white rounded-xl overflow-hidden border border-gray-300"
               >
                 <button
                   type="button"
-                  className="w-full flex items-center justify-between px-4 py-3 cursor-pointer focus:outline-none"
+                  className="w-full flex items-center justify-between px-4 py-4 cursor-pointer"
                   onClick={() => toggleAccordion(trait)}
-                  aria-expanded={isOpen}
-                  aria-controls={`panel-${trait}`}
                 >
                   <div className="flex items-center">
                     <ChevronRight
-                      className={`text-blue-600 mr-3 transform transition-transform duration-200 ${
-                        isOpen ? "rotate-90" : ""
-                      }`}
+                      className={`text-blue-600 mr-3 transform transition-transform duration-200 ${isOpen ? "rotate-90" : ""
+                        }`}
                       size={18}
                     />
-                    <div className="text-left">
-                      <div className="font-semibold text-gray-800">
-                        {info.label}
-                      </div>
-                    </div>
+                    <div className="font-semibold text-gray-800">{info.label}</div>
                   </div>
                 </button>
 
                 <div
-                  id={`panel-${trait}`}
-                  className={`px-4 overflow-hidden transition-all duration-200 ${
-                    isOpen ? "py-4" : "py-0"
-                  }`}
-                  style={{ maxHeight: isOpen ? "400px" : "0px" }}
+                  className={`px-4 overflow-hidden transition-all duration-300 ${isOpen ? "py-4" : "py-0"
+                    }`}
+                  style={{ maxHeight: isOpen ? "300px" : "0px" }}
                 >
-                  <div className="text-gray-700">
-                    {info.summary || (language === "mr" ? "सारांश उपलब्ध नाही." : "No summary available.")}
-                  </div>
+                  <div className="text-gray-700">{info.summary}</div>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Right side - Chart */}
-        <div className="bg-white p-4 rounded-xl">
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 20 }}>
-              <CartesianGrid strokeDasharray="5 5" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="name" 
-                tick={{ fontSize: 12, fill: '#4b5563' }} 
-                axisLine={{ stroke: '#e5e7eb' }}
-                tickLine={false}
+        {/* RIGHT PANEL (chart, SAME HEIGHT as left) */}
+        <div className="h-[420px] p-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              margin={{ top: 10, right: 0, left: 0, bottom: 20 }}
+            >
+              <CartesianGrid  stroke="#e5e7eb" />
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: 12, fill: "#4b5563" }}
               />
-              <YAxis 
-                tick={{ fontSize: 12, fill: '#4b5563' }}
-                axisLine={{ stroke: '#e5e7eb' }}
-                tickLine={false}
+              <YAxis
+                tick={{ fontSize: 12, fill: "#4b5563" }}
               />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: 'white',
-                  borderRadius: '0.5rem',
-                  border: '1px solid #e5e7eb',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                }}
-              />
-              <Bar 
-                dataKey="value" 
-                fill="#2563eb" 
+              <Tooltip cursor={{ fill: "transparent" }} />
+
+              <Bar
+                dataKey="value"
+                fill="#2563eb"
                 radius={[6, 6, 0, 0]}
-                className="transition-colors duration-200 hover:fill-[#1d4ed8]"
-                style={{
-                  cursor: 'pointer',
-                }}
               >
-                {chartData.map((entry, index) => (
-                  <rect
-                    key={`bar-${index}`}
-                    x={entry.x}
-                    y={entry.y}
-                    width={entry.width}
-                    height={entry.height}
-                    fill="#2563eb"
-                    className="transition-colors duration-200 hover:fill-[#1d4ed8]"
-                  />
-                ))}
+                <LabelList
+                  dataKey="value"
+                  position="middle"
+                  fill="white"
+                  style={{ fontWeight: 500 }}
+                />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
+
       </div>
+
     </div>
   );
 }

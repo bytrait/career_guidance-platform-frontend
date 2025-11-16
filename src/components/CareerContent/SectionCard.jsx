@@ -6,8 +6,9 @@ import styles from "./SegmentedStyles.module.css";
 export default function SectionCard({ title, children, color = "blue" }) {
   return (
     <section className={`${styles.card} ${styles[color]}`}>
-      <h3 className={styles.cardTitle}>{title}</h3>
+      <h3 className={styles.cardTitle}>{parse(title)}</h3>
       <div className={styles.cardContent}>{children}</div>
     </section>
   );
 }
+
