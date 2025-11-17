@@ -93,7 +93,7 @@ export default function ReportPage() {
 
   const handleSelectCareer = (career) => {
     dispatch(setSelectedCareer(career));
-    navigate(`/career/${career.id}`);
+    window.open(`/career/${career.id}`, "_blank");
   };
 
   // Still loading?
