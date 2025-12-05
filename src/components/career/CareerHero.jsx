@@ -109,10 +109,7 @@ export default function CareerHero() {
         <header className="relative py-10 px-4 overflow-hidden">
             <div className="max-w-7xl mx-auto relative">
 
-                {/* Mobile Circular Score */}
-                <div className="flex justify-center mb-6 md:hidden">
-                    <CircularScore score={matchScore} language={language} />
-                </div>
+
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
@@ -128,6 +125,11 @@ export default function CareerHero() {
                         {subtitle && (
                             <p className="text-gray-600 mt-2 max-w-3xl">{subtitle}</p>
                         )}
+
+                        {/* Mobile Circular Score */}
+                        <div className="flex justify-center mb-6 md:hidden">
+                            <CircularScore score={matchScore} language={language} />
+                        </div>
 
                         {/* Strengths */}
                         <div className="mt-4 flex flex-wrap gap-2">
@@ -194,7 +196,7 @@ export default function CareerHero() {
                     </div>
 
                     {/* RIGHT COLUMN */}
-                    <div className="items-center">
+                    <div className="items-center justify-center hidden md:flex">
                         <CircularScore score={matchScore} language={language} />
 
                     </div>

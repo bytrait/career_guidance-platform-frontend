@@ -1,110 +1,250 @@
 // src/components/career/StageNavigationTabs.jsx
-import React from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 
 const STAGE_ICONS = {
-  "Career Overview": "bi bi-info-circle-fill",
-  "Educational Path & Eligibility": "bi bi-mortarboard-fill",
+  // English Short Keys
+  "Overview": "bi bi-info-circle-fill",
+  "Eligibility & Path": "bi bi-mortarboard-fill",
   "Entrance Exams": "bi bi-journal-check",
-  "Top Colleges & Scholarships": "bi bi-building",
-  "Skills & Tools Required": "bi bi-tools",
-  "Career Growth & Opportunities": "bi bi-graph-up-arrow",
-  "Future Trends & Real-world Exposure": "bi bi-lightbulb-fill",
-  "Motivation & Summary": "bi bi-stars",
+  "Colleges & Scholarships": "bi bi-building",
+  "Skills & Tools": "bi bi-tools",
+  "Growth & Opportunities": "bi bi-graph-up-arrow",
+  "Future Trends": "bi bi-lightbulb-fill",
+  "Summary": "bi bi-stars",
+
+  "Eligibility & Training": "bi bi-clipboard-check",
+  "Courses & Certificates": "bi bi-award-fill",
+  "Tools & Skills": "bi bi-tools",
+  "Job Roles & Industry": "bi bi-briefcase-fill",
+  "Salary & Earnings": "bi bi-cash-stack",
+  "Career Upgrade Path": "bi bi-bar-chart-line-fill",
+  "Future & Exposure": "bi bi-lightbulb",
+
+  // Marathi Short Keys
+  "आढावा": "bi bi-info-circle-fill",
+  "पात्रता व मार्ग": "bi bi-mortarboard-fill",
+  "प्रवेश परीक्षा": "bi bi-journal-check",
+  "महाविद्यालये व शिष्यवृत्ती": "bi bi-building",
+  "कौशल्ये व साधने": "bi bi-tools",
+  "वाढ व संधी": "bi bi-graph-up-arrow",
+  "भविष्यातील ट्रेंड": "bi bi-lightbulb-fill",
+  "सारांश": "bi bi-stars",
+
+  "पात्रता व प्रशिक्षण": "bi bi-clipboard-check",
+  "कोर्सेस व प्रमाणपत्रे": "bi bi-award-fill",
+  "साधने व कौशल्ये": "bi bi-tools",
+  "नोकरी भूमिका व उद्योग": "bi bi-briefcase-fill",
+  "पगार व उत्पन्न": "bi bi-cash-stack",
+  "करिअर प्रगती मार्ग": "bi bi-bar-chart-line-fill",
+  "भविष्य व अनुभव": "bi bi-lightbulb",
 };
 
 export default function StageNavigationTabs({
   steps = [],
   selectedIndex = 0,
-  onSelect = () => {},
+  onSelect = () => { },
   language = "en",
 }) {
+  const containerRef = useRef(null);
+  const [centers, setCenters] = useState([]);
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
+  let scrollTimeout = useRef(null);
+  const [isCentered, setIsCentered] = useState(false);
+
+
+  // Measure center position of each stage circle
+  const measureCenters = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const nodes = container.querySelectorAll(".stage-item");
+
+    const newCenters = Array.from(nodes).map((el) => {
+      const r = el.getBoundingClientRect();
+      const centerX =
+        (r.left + r.width / 2) - containerRect.left + container.scrollLeft;
+      return Math.round(centerX);
+    });
+
+    setCenters(newCenters);
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const onUserScroll = () => {
+      setIsUserScrolling(true);
+
+      // reset previous timer
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+
+      // user stopped scrolling for 300ms → allow auto scroll again
+      scrollTimeout.current = setTimeout(() => {
+        setIsUserScrolling(false);
+      }, 300);
+    };
+
+    container.addEventListener("scroll", onUserScroll);
+
+    return () => {
+      if (container) container.removeEventListener("scroll", onUserScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const totalWidth = steps.length * 120 + 40; // each item 120px + padding
+    const screenWidth = container.clientWidth;
+
+    setIsCentered(totalWidth <= screenWidth);
+  }, [steps.length, window.innerWidth]);
+
+
+  useEffect(() => {
+    measureCenters();
+    window.addEventListener("resize", measureCenters);
+    const c = containerRef.current;
+    if (c) c.addEventListener("scroll", measureCenters);
+
+    return () => {
+      window.removeEventListener("resize", measureCenters);
+      if (c) c.removeEventListener("scroll", measureCenters);
+    };
+  }, [measureCenters, steps.length]);
+
+  useEffect(() => {
+    const t = setTimeout(measureCenters, 30);
+    return () => clearTimeout(t);
+  }, [selectedIndex, steps.length, measureCenters]);
+
+  const total = steps.length;
+  const canDraw = centers.length === total && total > 0;
+
+  const start = canDraw ? centers[0] : 0;
+  const end = canDraw ? centers[total - 1] : 0;
+  const fillWidth = canDraw ? Math.max(0, centers[selectedIndex] - start) : 0;
+
+  // 🔥 Auto-scroll to keep active centered
+  useEffect(() => {
+    if (!containerRef.current || !canDraw) return;
+
+    // ⛔ Do NOT auto scroll if user is manually scrolling
+    if (isUserScrolling) return;
+
+    const container = containerRef.current;
+    const targetX = centers[selectedIndex] - container.clientWidth / 2;
+
+    container.scrollTo({
+      left: Math.max(0, targetX),
+      behavior: "smooth",
+    });
+  }, [selectedIndex, centers, canDraw, isUserScrolling]);
+
+
   return (
     <div className="w-full bg-white sticky top-0 z-30 border-b border-gray-200 shadow-sm">
-      <div className="overflow-x-auto scrollbar-hide">
-        
-        <div className="flex items-center gap-10 px-6 py-5 min-w-max relative">
+      <div
+        ref={containerRef}
+        className="relative overflow-x-auto scrollbar-hide py-6"
+      >
+        {/* Draw connector lines */}
+        {canDraw && (
+          <>
+            <div
+              className="absolute h-1 bg-gray-300 top-[55px] z-0"
+              style={{
+                left: start,
+                width: Math.max(0, end - start),
+              }}
+            />
+            <div
+              className="absolute h-2 bg-blue-600 top-[55px] rounded-full z-10 transition-all duration-500"
+              style={{
+                left: start,
+                width: fillWidth,
+              }}
+            />
+          </>
+        )}
 
-          {steps.map((s, idx) => {
-            const isActive = idx === selectedIndex;
-            const isCompleted = idx < selectedIndex;
+        {/* Stage Items */}
+        <div
+          className={`
+    flex items-center gap-5 px-10 relative z-20
+    ${isCentered ? "justify-center w-full" : "min-w-max"}
+  `}
+        >          {steps.map((s, idx) => {
+          const isActive = idx === selectedIndex;
+          const isCompleted = idx < selectedIndex;
+          const icon = STAGE_ICONS[s.title] || "bi bi-dot";
 
-            const iconClass = STAGE_ICONS[s.title] || "bi bi-dot";
-
-            return (
-              <React.Fragment key={idx}>
-
-                {/* --- PATHWAY NODE --- */}
-                <button
-                  onClick={() => onSelect(idx)}
-                  className={`
-                    flex flex-col items-center gap-1 relative group
-                    transition-all duration-300
-                  `}
-                >
-                  
-                  {/* OUTER CIRCLE */}
+          return (
+            <div
+              key={idx}
+              className="stage-item flex flex-col items-center"
+              style={{
+                width: 120,              // fixed width prevents shifting
+                flexShrink: 0,           // prevents half-circles on small screens
+              }}
+            >
+              {/* FIXED HEIGHT CIRCLE WRAPPER */}
+              <div
+                className="flex items-center justify-center"
+                style={{
+                  height: 70,            // ensures all circles are exactly aligned
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <button onClick={() => onSelect(idx)}>
                   <div
                     className={`
-                      w-12 h-12 flex items-center justify-center rounded-full border-2 
-                      transition-all duration-300
-                      ${
-                        isActive
-                          ? "border-blue-600 bg-blue-50 shadow-md scale-105"
-                          : isCompleted
-                          ? "border-blue-300 bg-blue-100"
-                          : "border-gray-300 bg-gray-100"
+          w-12 h-12 rounded-full border-2 flex items-center justify-center
+          transition-all duration-300
+          ${isActive
+                        ? "border-blue-600 bg-white shadow-md scale-105"
+                        : isCompleted
+                          ? "border-blue-400 bg-white"
+                          : "border-gray-400 bg-white"
                       }
-                    `}
+        `}
                   >
                     <i
-                      className={`${iconClass} text-lg 
-                        ${
-                          isActive
-                            ? "text-blue-700"
-                            : isCompleted
-                            ? "text-blue-600"
-                            : "text-gray-500"
-                        }
-                      `}
+                      className={`${icon} text-lg ${isActive
+                        ? "text-blue-700"
+                        : isCompleted
+                          ? "text-blue-600"
+                          : "text-gray-500"
+                        }`}
                     ></i>
                   </div>
-
-                  {/* TITLE */}
-                  <span
-                    className={`text-xs text-center w-28 leading-tight
-                      ${
-                        isActive
-                          ? "text-blue-700 font-semibold"
-                          : "text-gray-600"
-                      }
-                    `}
-                  >
-                    {language === "mr" && s.title_mr ? s.title_mr : s.title}
-                  </span>
-
                 </button>
+              </div>
 
-                {/* --- CONNECTING LINE --- */}
-                {idx < steps.length - 1 && (
-                  <div className="flex-1 h-0.5 bg-gray-300 relative -ml-5 -mr-5">
-                    <div
-                      className="h-full bg-blue-600 transition-all duration-500"
-                      style={{
-                        width:
-                          idx < selectedIndex
-                            ? "100%"
-                            : idx === selectedIndex
-                            ? "50%"
-                            : "0%",
-                      }}
-                    ></div>
-                  </div>
-                )}
+              {/* LABEL - DOES NOT AFFECT CIRCLE POSITION */}
+              <div
+                style={{
+                  minHeight: 40,         // ensure label height is fixed
+                  paddingTop: 8,
+                }}
+              >
+                <span
+                  className={`text-xs text-center block leading-tight ${isActive ? "text-blue-700 font-semibold" : "text-gray-600"
+                    }`}
+                  style={{ width: "100%" }}
+                >
+                  {language === "mr" && s.title_mr ? s.title_mr : s.title}
+                </span>
+              </div>
+            </div>
 
-              </React.Fragment>
-            );
-          })}
-
+          );
+        })}
         </div>
       </div>
     </div>

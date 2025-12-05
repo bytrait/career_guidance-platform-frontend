@@ -14,13 +14,13 @@ export default function CongratulationsPage() {
 
   const [userDetails, setUserDetails] = useState(null);
 
-    useEffect(() => {
-      const getUserDetails = async () => {
-        const userDetails = await fetchUserDetailsById();
-        setUserDetails(userDetails);
-      };
-      getUserDetails();
-    }, []);
+  useEffect(() => {
+    const getUserDetails = async () => {
+      const userDetails = await fetchUserDetailsById();
+      setUserDetails(userDetails);
+    };
+    getUserDetails();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -105,42 +105,42 @@ export default function CongratulationsPage() {
         </div>
 
         <button
-  type="submit"
-  disabled={loading}
-  className={`w-full flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 
-    ${loading 
-      ? "bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed animate-pulse" 
-      : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
-    }`}
->
-  {loading ? (
-    <>
-      <svg
-        className="animate-spin h-5 w-5 text-white"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-        ></path>
-      </svg>
-      <span>Generating Report...</span>
-    </>
-  ) : (
-    "🚀 Generate AI Career Report"
-  )}
-</button>
+          type="submit"
+          disabled={loading}
+          className={`w-full flex items-center justify-center gap-2 text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 
+    ${loading
+              ? "bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed animate-pulse"
+              : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
+            }`}
+        >
+          {loading ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+              <span>Generating Report...</span>
+            </>
+          ) : (
+            "🚀 Generate AI Career Report"
+          )}
+        </button>
 
       </form>
     </div>

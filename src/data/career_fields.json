@@ -1,114 +1,114 @@
 [
   {
     "careerField": { "en": "Agriculture & Food Sciences", "mr": "कृषी आणि अन्न विज्ञान" },
-    "scores": { "R": 0.7, "I": 0.6, "A": 0.2, "S": 0.4, "E": 0.3, "C": 0.3 }
+    "scores": { "R": 0.4, "I": 0.3, "C": 0.2, "S": 0.1, "E": 0.0, "A": 0.0 }
   },
   {
     "careerField": { "en": "Architecture & Design", "mr": "आर्किटेक्चर आणि डिझाइन" },
-    "scores": { "R": 0.4, "I": 0.5, "A": 0.8, "S": 0.3, "E": 0.4, "C": 0.2 }
+    "scores": { "A": 0.4, "I": 0.3, "R": 0.2, "S": 0.1, "E": 0.0, "C": 0.0 }
   },
   {
     "careerField": { "en": "Aviation & Aerospace", "mr": "विमानन आणि अवकाश" },
-    "scores": { "R": 0.7, "I": 0.8, "A": 0.2, "S": 0.3, "E": 0.4, "C": 0.5 }
+    "scores": { "R": 0.4, "I": 0.4, "C": 0.1, "S": 0.1, "A": 0.0, "E": 0.0 }
   },
   {
     "careerField": { "en": "Banking & Financial Services", "mr": "बँकिंग आणि वित्तीय सेवा" },
-    "scores": { "R": 0.2, "I": 0.6, "A": 0.1, "S": 0.3, "E": 0.5, "C": 0.8 }
+    "scores": { "C": 0.4, "E": 0.3, "I": 0.2, "S": 0.1, "R": 0.0, "A": 0.0 }
   },
   {
     "careerField": { "en": "Biotechnology & Life Sciences", "mr": "जैवतंत्रज्ञान आणि जीवन विज्ञान" },
-    "scores": { "R": 0.3, "I": 0.9, "A": 0.2, "S": 0.4, "E": 0.2, "C": 0.5 }
+    "scores": { "I": 0.5, "R": 0.2, "C": 0.1, "S": 0.1, "A": 0.1, "E": 0.0 }
   },
   {
     "careerField": { "en": "Business & Management", "mr": "व्यवसाय आणि व्यवस्थापन" },
-    "scores": { "R": 0.1, "I": 0.5, "A": 0.2, "S": 0.5, "E": 0.8, "C": 0.6 }
+    "scores": { "E": 0.4, "C": 0.3, "S": 0.2, "I": 0.1, "A": 0.0, "R": 0.0 }
   },
   {
     "careerField": { "en": "Commerce & Management", "mr": "वाणिज्य आणि व्यवस्थापन" },
-    "scores": { "R": 0.1, "I": 0.5, "A": 0.2, "S": 0.4, "E": 0.7, "C": 0.7 }
+    "scores": { "C": 0.4, "E": 0.3, "S": 0.2, "I": 0.1, "A": 0.0, "R": 0.0 }
   },
   {
     "careerField": { "en": "Data & Business Analytics", "mr": "डेटा आणि व्यवसाय विश्लेषण" },
-    "scores": { "R": 0.1, "I": 0.9, "A": 0.1, "S": 0.3, "E": 0.4, "C": 0.6 }
+    "scores": { "I": 0.5, "C": 0.3, "R": 0.1, "E": 0.1, "S": 0.0, "A": 0.0 }
   },
   {
     "careerField": { "en": "Design & Creative Arts", "mr": "डिझाइन आणि सर्जनशील कला" },
-    "scores": { "R": 0.1, "I": 0.3, "A": 0.9, "S": 0.4, "E": 0.4, "C": 0.2 }
+    "scores": { "A": 0.5, "I": 0.2, "S": 0.2, "E": 0.1, "R": 0.0, "C": 0.0 }
   },
   {
     "careerField": { "en": "Economics & Finance", "mr": "अर्थशास्त्र आणि वित्त" },
-    "scores": { "R": 0.2, "I": 0.8, "A": 0.1, "S": 0.3, "E": 0.6, "C": 0.7 }
+    "scores": { "I": 0.4, "C": 0.3, "E": 0.2, "R": 0.1, "A": 0.0, "S": 0.0 }
   },
   {
     "careerField": { "en": "Education & Training", "mr": "शिक्षण आणि प्रशिक्षण" },
-    "scores": { "R": 0.1, "I": 0.5, "A": 0.3, "S": 0.9, "E": 0.4, "C": 0.4 }
+    "scores": { "S": 0.4, "E": 0.2, "I": 0.2, "A": 0.1, "C": 0.1, "R": 0.0 }
   },
   {
     "careerField": { "en": "Engineering & Technology", "mr": "अभियांत्रिकी आणि तंत्रज्ञान" },
-    "scores": { "R": 0.7, "I": 0.8, "A": 0.2, "S": 0.3, "E": 0.4, "C": 0.5 }
+    "scores": { "I": 0.4, "R": 0.3, "C": 0.2, "S": 0.1, "E": 0.0, "A": 0.0 }
   },
   {
     "careerField": { "en": "Finance & Accounting", "mr": "वित्त आणि लेखांकन" },
-    "scores": { "R": 0.1, "I": 0.7, "A": 0.1, "S": 0.3, "E": 0.5, "C": 0.9 }
+    "scores": { "C": 0.5, "I": 0.3, "E": 0.1, "S": 0.1, "A": 0.0, "R": 0.0 }
   },
   {
     "careerField": { "en": "General / Multidisciplinary", "mr": "सामान्य / बहुविद्याशाखीय" },
-    "scores": { "R": 0.3, "I": 0.5, "A": 0.4, "S": 0.5, "E": 0.4, "C": 0.4 }
+    "scores": { "I": 0.3, "C": 0.2, "S": 0.2, "E": 0.1, "A": 0.1, "R": 0.1 }
   },
   {
     "careerField": { "en": "Government & Administration", "mr": "सरकार आणि प्रशासन" },
-    "scores": { "R": 0.2, "I": 0.6, "A": 0.2, "S": 0.6, "E": 0.5, "C": 0.8 }
+    "scores": { "C": 0.3, "S": 0.3, "E": 0.2, "I": 0.1, "R": 0.1, "A": 0.0 }
   },
   {
     "careerField": { "en": "Healthcare & Medicine", "mr": "आरोग्य सेवा आणि वैद्यक" },
-    "scores": { "R": 0.2, "I": 0.8, "A": 0.2, "S": 0.9, "E": 0.4, "C": 0.5 }
+    "scores": { "S": 0.5, "I": 0.3, "R": 0.1, "C": 0.1, "A": 0.0, "E": 0.0 }
   },
   {
     "careerField": { "en": "Information Technology", "mr": "माहिती तंत्रज्ञान" },
-    "scores": { "R": 0.4, "I": 0.9, "A": 0.2, "S": 0.3, "E": 0.4, "C": 0.5 }
+    "scores": { "I": 0.4, "R": 0.3, "C": 0.2, "E": 0.1, "S": 0.0, "A": 0.0 }
   },
   {
     "careerField": { "en": "Legal & Compliance", "mr": "कायदेशीर आणि अनुपालन" },
-    "scores": { "R": 0.1, "I": 0.7, "A": 0.2, "S": 0.5, "E": 0.5, "C": 0.8 }
+    "scores": { "C": 0.4, "I": 0.3, "E": 0.2, "S": 0.1, "R": 0.0, "A": 0.0 }
   },
   {
     "careerField": { "en": "Media & Communication", "mr": "मीडिया आणि संवाद" },
-    "scores": { "R": 0.1, "I": 0.4, "A": 0.6, "S": 0.6, "E": 0.5, "C": 0.3 }
+    "scores": { "E": 0.4, "A": 0.3, "S": 0.2, "I": 0.1, "R": 0.0, "C": 0.0 }
   },
   {
     "careerField": { "en": "Media & Entertainment", "mr": "मीडिया आणि मनोरंजन" },
-    "scores": { "R": 0.1, "I": 0.3, "A": 0.8, "S": 0.6, "E": 0.6, "C": 0.2 }
+    "scores": { "A": 0.5, "E": 0.3, "S": 0.1, "I": 0.1, "R": 0.0, "C": 0.0 }
   },
   {
     "careerField": { "en": "Performing & Fine Arts", "mr": "सादरीकरण आणि ललित कला" },
-    "scores": { "R": 0.1, "I": 0.2, "A": 0.95, "S": 0.6, "E": 0.4, "C": 0.1 }
+    "scores": { "A": 0.6, "S": 0.2, "E": 0.1, "I": 0.1, "R": 0.0, "C": 0.0 }
   },
   {
     "careerField": { "en": "Pharmaceutical Sciences", "mr": "औषधनिर्माण शास्त्र" },
-    "scores": { "R": 0.2, "I": 0.9, "A": 0.1, "S": 0.4, "E": 0.3, "C": 0.6 }
+    "scores": { "I": 0.5, "R": 0.2, "C": 0.2, "S": 0.1, "A": 0.0, "E": 0.0 }
   },
   {
     "careerField": { "en": "Public Administration", "mr": "सार्वजनिक प्रशासन" },
-    "scores": { "R": 0.1, "I": 0.6, "A": 0.2, "S": 0.7, "E": 0.6, "C": 0.7 }
+    "scores": { "S": 0.4, "E": 0.3, "C": 0.2, "I": 0.1, "R": 0.0, "A": 0.0 }
   },
   {
     "careerField": { "en": "Science & Research", "mr": "विज्ञान आणि संशोधन" },
-    "scores": { "R": 0.2, "I": 0.95, "A": 0.2, "S": 0.3, "E": 0.3, "C": 0.5 }
+    "scores": { "I": 0.5, "R": 0.3, "C": 0.1, "S": 0.1, "A": 0.0, "E": 0.0 }
   },
   {
     "careerField": { "en": "Social Sciences & Psychology", "mr": "सामाजिक विज्ञान आणि मानसशास्त्र" },
-    "scores": { "R": 0.1, "I": 0.7, "A": 0.3, "S": 0.9, "E": 0.4, "C": 0.4 }
+    "scores": { "S": 0.5, "I": 0.2, "A": 0.1, "E": 0.1, "C": 0.1, "R": 0.0 }
   },
   {
     "careerField": { "en": "Social Work & Development", "mr": "सामाजिक कार्य आणि विकास" },
-    "scores": { "R": 0.1, "I": 0.4, "A": 0.3, "S": 0.95, "E": 0.5, "C": 0.3 }
+    "scores": { "S": 0.6, "E": 0.2, "A": 0.1, "C": 0.1, "I": 0.0, "R": 0.0 }
   },
   {
     "careerField": { "en": "Sports & Fitness", "mr": "क्रीडा आणि फिटनेस" },
-    "scores": { "R": 0.8, "I": 0.4, "A": 0.3, "S": 0.6, "E": 0.5, "C": 0.2 }
+    "scores": { "R": 0.4, "S": 0.3, "E": 0.2, "A": 0.1, "I": 0.0, "C": 0.0 }
   },
   {
     "careerField": { "en": "Urban Planning & Infrastructure", "mr": "नगरी नियोजन आणि पायाभूत सुविधा" },
-    "scores": { "R": 0.5, "I": 0.8, "A": 0.4, "S": 0.4, "E": 0.4, "C": 0.6 }
+    "scores": { "I": 0.4, "R": 0.3, "C": 0.2, "S": 0.1, "A": 0.0, "E": 0.0 }
   }
 ]

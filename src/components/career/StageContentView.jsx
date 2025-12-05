@@ -1,18 +1,29 @@
 // src/components/career/StageContentView.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import StageContentCard from "./StageContentCard";
 
 export default function StageContentView({ step, language = "en" }) {
+  const containerRef = useRef(null);
+
   const [visible, setVisible] = useState(true);
   const [animKey, setAnimKey] = useState(0);
 
-  // Trigger fade/slide animation when stage changes
+  // Trigger animation + auto-scroll when the stage changes
   useEffect(() => {
+    // fade-out animation
     setVisible(false);
 
     const t = setTimeout(() => {
       setAnimKey((k) => k + 1);
       setVisible(true);
+
+      // 🔥 Scroll to top ONLY inside content container
+      if (containerRef.current) {
+        containerRef.current.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
     }, 200);
 
     return () => clearTimeout(t);
@@ -27,7 +38,10 @@ export default function StageContentView({ step, language = "en" }) {
   }
 
   return (
-    <div className="mt-6">
+    <div
+      ref={containerRef}
+      className="mt-6 max-h-[75vh] overflow-y-auto pr-2"
+    >
       <div
         key={animKey}
         className={`transition-all duration-300 

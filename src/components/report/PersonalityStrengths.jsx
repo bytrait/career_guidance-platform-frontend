@@ -63,6 +63,15 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
   const [chartData, setChartData] = useState([]);
   const [accordions, setAccordions] = useState({});
   const [openTrait, setOpenTrait] = useState(null);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => setIsSmallScreen(window.innerWidth < 640); // tailwind 'sm'
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+
 
   useEffect(() => {
     if (!scores || scores.length === 0) return;
@@ -101,7 +110,11 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
       }
     });
     setAccordions(acc);
-    setOpenTrait(null);
+
+    // auto-open first accordion
+    const firstKey = Object.keys(acc)[0];
+    setOpenTrait(firstKey || null);
+
   }, [scores, language]);
 
   const toggleAccordion = (trait) => {
@@ -129,10 +142,10 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
       </div>
 
       {/* Content Section */}
-      <div className="max-w-7xl w-full mt-8 grid grid-cols-1 lg:grid-cols-2">
+      <div className="max-w-7xl w-full mt-8 grid grid-cols-1 lg:grid-cols-2 lg:gap-8">
 
         {/* LEFT PANEL (scrollable, equal height) */}
-        <div className="h-[420px]  pr-2 space-y-4">
+        <div className="lg:h-[420px] space-y-4">
           {Object.entries(accordions).map(([trait, info]) => {
             const isOpen = openTrait === trait;
             return (
@@ -167,38 +180,45 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
           })}
         </div>
 
-        {/* RIGHT PANEL (chart, SAME HEIGHT as left) */}
-        <div className="h-[420px] p-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={chartData}
-              margin={{ top: 10, right: 0, left: 0, bottom: 20 }}
-            >
-              <CartesianGrid  stroke="#e5e7eb" />
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: 12, fill: "#4b5563" }}
-              />
-              <YAxis
-                tick={{ fontSize: 12, fill: "#4b5563" }}
-              />
-              <Tooltip cursor={{ fill: "transparent" }} />
-
-              <Bar
-                dataKey="value"
-                fill="#2563eb"
-                radius={[6, 6, 0, 0]}
+        {/* RIGHT PANEL */}
+        <div
+          className="w-full px-2 mt-6 lg:mt-0 lg:p-4">
+          <div
+            className="w-full h-64 lg:h-[420px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                margin={{ top: 0, right: 30, left: -35, bottom: 10 }}
               >
-                <LabelList
-                  dataKey="value"
-                  position="middle"
-                  fill="white"
-                  style={{ fontWeight: 500 }}
+                <CartesianGrid stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="name"
+                  interval={0}
+                  tick={{
+                    fontSize: isSmallScreen ? 10 : 12,
+                    fill: "#4b5563",
+                  }}
+                  angle={isSmallScreen ? 30 : 0}
+                  textAnchor={isSmallScreen ? "top" : "middle"}
+                  height={isSmallScreen ? 45 : 30}
                 />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+
+                <YAxis tick={{ fontSize: 12, fill: "#4b5563" }} />
+                <Tooltip cursor={{ fill: "transparent" }} />
+                <Bar dataKey="value" fill="#2563eb" radius={[6, 6, 0, 0]}>
+                  <LabelList
+                    dataKey="value"
+                    position="middle"
+                    fill="white"
+                    style={{ fontWeight: 500 }}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
+
+
 
       </div>
 

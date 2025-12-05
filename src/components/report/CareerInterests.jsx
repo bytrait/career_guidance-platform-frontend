@@ -37,6 +37,15 @@ export default function CareerInterests({ scores = [], language = "en" }) {
   const [data, setData] = useState([]);
   const [accordions, setAccordions] = useState([]);
   const [openCode, setOpenCode] = useState(null);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => setIsSmallScreen(window.innerWidth < 640);
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+
 
   useEffect(() => {
     if (!scores || scores.length === 0) return;
@@ -72,6 +81,8 @@ export default function CareerInterests({ scores = [], language = "en" }) {
         };
       });
     setAccordions(top3);
+    const openCode = top3.length > 0 ? top3[0].code : null;
+    setOpenCode(openCode);
   }, [scores, language]);
 
   const toggleAccordion = (code) => {
@@ -79,7 +90,7 @@ export default function CareerInterests({ scores = [], language = "en" }) {
   };
 
   return (
-    <div className="w-full p-6 flex flex-col items-center bg-gray-50 border border-gray-200 rounded-sm"> 
+    <div className="w-full p-6 flex flex-col items-center bg-gray-50 border border-gray-200 rounded-sm">
       {/* Header */}
       <div className="max-w-7xl w-full flex items-center justify-between">
         <div>
@@ -111,9 +122,8 @@ export default function CareerInterests({ scores = [], language = "en" }) {
                 >
                   <div className="flex items-center">
                     <ChevronRight
-                      className={`text-blue-600 mr-3 transform transition-transform duration-200 ${
-                        isOpen ? "rotate-90" : ""
-                      }`}
+                      className={`text-blue-600 mr-3 transform transition-transform duration-200 ${isOpen ? "rotate-90" : ""
+                        }`}
                       size={18}
                     />
                     <div className="text-left">
@@ -125,9 +135,8 @@ export default function CareerInterests({ scores = [], language = "en" }) {
                 </button>
 
                 <div
-                  className={`px-4 overflow-hidden transition-all duration-200 ${
-                    isOpen ? "py-4" : "py-0"
-                  }`}
+                  className={`px-4 overflow-hidden transition-all duration-200 ${isOpen ? "py-4" : "py-0"
+                    }`}
                   style={{ maxHeight: isOpen ? "400px" : "0px" }}
                 >
                   <div className="text-gray-700">{item.summary}</div>
@@ -140,10 +149,22 @@ export default function CareerInterests({ scores = [], language = "en" }) {
         {/* Right side - Radar Chart */}
         <div className="p-5 flex flex-col items-center">
           <ResponsiveContainer width="100%" height={350}>
-            <RadarChart data={data}>
+            <RadarChart
+              data={data}
+              outerRadius={isSmallScreen ? 70 : 120}
+            >
               <PolarGrid />
-              <PolarAngleAxis dataKey="subject" />
+
+              <PolarAngleAxis
+                dataKey="subject"
+                tick={{
+                  fontSize: isSmallScreen ? 10 : 14,
+                  fill: "#374151",
+                }}
+              />
+
               <Tooltip />
+
               <Radar
                 name="RIASEC"
                 dataKey="value"
@@ -153,6 +174,7 @@ export default function CareerInterests({ scores = [], language = "en" }) {
               />
             </RadarChart>
           </ResponsiveContainer>
+
         </div>
       </div>
     </div>

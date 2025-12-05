@@ -7,7 +7,7 @@ export const savePreference = async ({ preferredLanguage, economicStatus }) => {
     preferredLanguage: preferredLanguage?.toLowerCase(),
     economicStatus: economicStatus?.toLowerCase(),
   };
-  
+  console.log("Saving preference with payload:", payload);
   const response = await API.post("/assessment/preference", payload);
   return response.data;
 };

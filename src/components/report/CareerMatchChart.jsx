@@ -1,33 +1,3 @@
-// src/components/report/CareerMatchChart.jsx
-import React from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  LabelList,
-} from "recharts";
-
-// Language-based insights
-function getInsightLabel(value, lang) {
-  if (value >= 70) {
-    return lang === "mr" ? "उत्तम जुळणारे" : "Great Fit";
-  } else if (value >= 40) {
-    return lang === "mr" ? "मध्यम जुळणारे" : "Moderate Fit";
-  }
-  return lang === "mr" ? "कमी जुळणारे" : "Low Fit";
-}
-
-// Dynamic bar color
-function getBarColor(value) {
-  if (value >= 70) return "#16a34a";     // green
-  if (value >= 40) return "#f59e0b";     // yellow
-  return "#dc2626";                      // red
-}
-
 export default function CareerMatchChart({ chartData, language = "en" }) {
   if (!chartData || chartData.length === 0) {
     return (
@@ -38,99 +8,40 @@ export default function CareerMatchChart({ chartData, language = "en" }) {
   }
 
   return (
-    <div className="w-full bg-white shadow-lg rounded-xl p-6">
-      {/* Heading */}
-      <h3 className="text-xl font-bold text-center mb-4 text-gray-800">
+    <div className="w-full bg-white rounded-xl p-6">
+      <h3 className="text-xl font-bold text-center mb-6 text-gray-800">
         {language === "mr"
           ? "श्रेणी जुळण्याचे चार्ट"
           : "Career Category Match Chart"}
       </h3>
 
-      <ResponsiveContainer width="100%" height={420}>
-        <BarChart
-          data={chartData}
-          layout="vertical"
-          margin={{ top: 20, right: 40, left: 100, bottom: 20 }}
-        >
-          {/* Soft background */}
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+      <div className="space-y-6 w-full">
+        {chartData.map((item, index) => {
+          const percent = item.value; // 0–100
 
-          {/* X-axis (score) */}
-          <XAxis
-            type="number"
-            domain={[0, 100]}
-            tick={{ fontSize: 12, fill: "#4b5563" }}
-            tickLine={false}
-            axisLine={false}
-          />
+          return (
+            <div key={index} className="w-full">
+              {/* Label */}
+              <div className="mb-2 font-semibold text-gray-800 text-sm sm:text-base">
+                {item.name}
+              </div>
 
-          {/* Y-axis (categories) */}
-          <YAxis
-            dataKey="name"
-            type="category"
-            width={180}
-            tick={{ fontSize: 13, fill: "#111827", fontWeight: 500 }}
-            tickLine={false}
-            axisLine={false}
-          />
-
-          {/* Tooltip with insight
-          <Tooltip
-            cursor={{ fill: "transparent" }}
-            formatter={(value) => [
-              `${value} (${getInsightLabel(value, language)})`,
-              language === "mr" ? "स्कोर" : "Score",
-            ]}
-            contentStyle={{
-              borderRadius: "10px",
-              border: "1px solid #e2e8f0",
-              backgroundColor: "white",
-              boxShadow:
-                "0 6px 12px -1px rgba(0,0,0,0.1), 0 4px 6px -1px rgba(0,0,0,0.05)",
-            }}
-          /> */}
-
-          {/* Background bar */}
-          {/* <Bar
-            dataKey="value"
-            fill="#2563eb"
-            radius={[0, 6, 6, 0]}
-            opacity={0.5}
-          /> */}
-
-          {/* Actual dynamic bar */}
-          <Bar
-            dataKey="value"
-            radius={[0, 6, 6, 0]}
-            animationDuration={1500}
-            shape={(props) => {
-              const { x, y, width, height, value } = props;
-              return (
-                <rect
-                  x={x}
-                  y={y}
-                  width={width}
-                  height={height}
-                  fill="#2563eb"
-                  rx={6}
-                  ry={6}
+              {/* Bar */}
+              <div className="w-full bg-gray-200 rounded-lg h-4 relative overflow-hidden">
+                <div
+                  className="h-4 rounded-lg transition-all duration-500 bg-blue-600"
+                  style={{ width: `${percent}%` }}
                 />
-              );
-            }}
-          >
-            {/* Score Label */}
-            <LabelList
-              dataKey="value"
-              position="middle"
-              style={{
-                fontSize: "13px",
-                fill: "white",
-                fontWeight: 400,
-              }}
-            />
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+              </div>
+
+              {/* Score */}
+              <div className="text-gray-700 text-sm mt-1">
+                {percent} {language === "mr" ? "पैकी 100" : "out of 100"}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -9,7 +9,7 @@ export default function StageContentCard({ step = {}, language = "en" }) {
   const readTime = Math.max(1, Math.ceil(wordCount / 200));
 
   return (
-    <article className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <article className="">
       
       {/* Title + Read time
       <header className="mb-6">

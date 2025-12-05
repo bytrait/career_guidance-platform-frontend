@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -20,10 +20,12 @@ import CareerOptions from "../components/report/CareerOptions";
 import CareerPath from "../components/report/CareerPath";
 import Spinner from "../components/common/Spinner";
 import { useNavigate } from "react-router-dom";
+import { fetchUserDetailsById } from "../services/userAssessmentProgressService";
 
 export default function ReportPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [userDetails, setUserDetails] = useState();
 
 
   const {
@@ -41,19 +43,21 @@ export default function ReportPage() {
     async function load() {
       try {
         const pref = await getPreference();
-        if (!language) {
-          dispatch(setLanguage(pref.preferredLanguage || "en"));
-        }
+        console.log("Fetched preferences:", pref);
+        
+      dispatch(setLanguage(pref.preferredLanguage || "en"));
+      dispatch(setEconomicStatus(pref.economicStatus || null));
 
-        if (!economicStatus) {
-          dispatch(setEconomicStatus(pref.economicStatus || null));
-        }
 
 
         const scoreRes = await getScores();
         if (scoreRes.data?.success) {
           dispatch(setScores(scoreRes.data.data));
         }
+
+        const userDetails = await fetchUserDetailsById();
+        setUserDetails(userDetails);
+
       } catch (err) {
         console.error("Failed initial load", err);
       }
@@ -61,6 +65,8 @@ export default function ReportPage() {
 
     load();
   }, []);
+
+  console.log("Current scores:", economicStatus,language);
 
   // Fetch recommended careers
   useEffect(() => {
@@ -124,7 +130,9 @@ export default function ReportPage() {
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="max-w-7xl mx-auto px-6 pb-16">
+      <div className="max-w-7xl mx-auto px-2">
+
+        <h1 className="text-5xl font-semibold mb-8 text-gray-800">{userDetails?.fullName}</h1>
 
         {/* Personality */}
         <section className="mb-16">

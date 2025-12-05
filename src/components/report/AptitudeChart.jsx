@@ -55,6 +55,16 @@ export default function AptitudeStrengths({ scores = [], language = "en" }) {
   const [accordions, setAccordions] = useState({});
   const [openTrait, setOpenTrait] = useState(null);
 
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsSmallScreen(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+
   useEffect(() => {
     const aptitudeScores = scores.filter(
       (s) => s.assessmentType === "APTITUDE"
@@ -90,7 +100,8 @@ export default function AptitudeStrengths({ scores = [], language = "en" }) {
 
 
     setAccordions(acc);
-    setOpenTrait(null);
+    const openTrait = accordions ? Object.keys(accordions)[0] : null;
+    setOpenTrait(openTrait);
   }, [scores, language]);
 
   const toggle = (trait) => {
@@ -205,44 +216,55 @@ export default function AptitudeStrengths({ scores = [], language = "en" }) {
         </div>
 
         {/* RIGHT — Chart (fixed height) */}
-        <div className="h-[420px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={chartData}
-              margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
-            >
-              <CartesianGrid stroke="#e5e7eb" />
-              <XAxis
-                dataKey="name"
-                tick={{ fontSize: 12, fill: "#4b5563" }}
-                tickLine={false}
-              />
-              <YAxis tick={{ fontSize: 12, fill: "#4b5563" }} domain={[0, 10]} />
+        <div className="w-full px-2 mt-6 lg:mt-0 lg:p-4">
+          <div className="w-full h-64 lg:h-[420px] mx-auto">
+            <ResponsiveContainer width="100%" height="100%">
 
-              <Tooltip
-                cursor={{ fill: "transparent" }}
-                contentStyle={{
-                  backgroundColor: "white",
-                  borderRadius: "8px",
-                  border: "1px solid #e5e7eb",
-                }}
-              />
-
-              <Bar
-                dataKey="score"
-                fill="#2563eb"
-                radius={[6, 6, 0, 0]}
-                className="transition-colors duration-200 hover:fill-[#1d4ed8]"
+              <BarChart
+                data={chartData}
+                margin={{ top: 0, right: 30, left: -30, bottom: 20 }}
               >
-                <LabelList
-                  dataKey="score"
-                  position="middle"
-                  fill="white"
-                  style={{ fontWeight: 400 }}
+                <CartesianGrid stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="name"
+                  interval={0}
+                  tick={{
+                    fontSize: isSmallScreen ? 10 : 12,
+                    fill: "#4b5563",
+                  }}
+                  angle={isSmallScreen ? 30 : 10}
+                  textAnchor={isSmallScreen ? "top" : "top"}
+                  height={isSmallScreen ? 60 : 30}
+                  tickLine={false}
                 />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+
+                <YAxis tick={{ fontSize: 12, fill: "#4b5563" }} domain={[0, 10]} />
+
+                <Tooltip
+                  cursor={{ fill: "transparent" }}
+                  contentStyle={{
+                    backgroundColor: "white",
+                    borderRadius: "8px",
+                    border: "1px solid #e5e7eb",
+                  }}
+                />
+
+                <Bar
+                  dataKey="score"
+                  fill="#2563eb"
+                  radius={[6, 6, 0, 0]}
+                  className="transition-colors duration-200 hover:fill-[#1d4ed8]"
+                >
+                  <LabelList
+                    dataKey="score"
+                    position="middle"
+                    fill="white"
+                    style={{ fontWeight: 400 }}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </>

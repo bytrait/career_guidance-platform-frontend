@@ -111,10 +111,10 @@ export default function AssessmentPage() {
   }, [assessmentType]);
 
   const handleAnswer = (questionId, value) => {
-      const updated = { ...answers, [questionId]: value };
-      setAnswers(updated);
-      saveToLocalStorage("assessment_answers", updated);
- 
+    const updated = { ...answers, [questionId]: value };
+    setAnswers(updated);
+    saveToLocalStorage("assessment_answers", updated);
+
 
   };
 
@@ -136,19 +136,37 @@ export default function AssessmentPage() {
       }));
     } else {
       let scoreMap = {};
+      let questionCount = {};
+
+      // Count questions & accumulate scores
       for (const q of questions) {
         const val = answers[q.id];
         if (val == null) continue;
+
         const adjustedScore = q.reverse ? 6 - val : val;
+
         scoreMap[q.trait.code] =
           (scoreMap[q.trait.code] || 0) + adjustedScore;
+
+        questionCount[q.trait.code] =
+          (questionCount[q.trait.code] || 0) + 1;
       }
-      return Object.entries(scoreMap).map(([code, score]) => ({
-        assessmentType,
-        traitOrCategoryCode: code,
-        score: Math.round(score),
-      }));
+
+      // Normalize every trait to 0–30
+      return Object.entries(scoreMap).map(([code, rawScore]) => {
+        const totalQuestions = questionCount[code];
+
+        // convert to 0–30
+        const normalized = Math.round((rawScore / (totalQuestions * 5)) * 30);
+
+        return {
+          assessmentType,
+          traitOrCategoryCode: code,
+          score: normalized,
+        };
+      });
     }
+
   };
 
   const submitScoresToAPI = async () => {
@@ -236,7 +254,7 @@ export default function AssessmentPage() {
     return <AptitudeInstructions onStart={startAptitudeTest} />;
   }
 
-if (loading || submitting) {
+  if (loading || submitting) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Spinner />

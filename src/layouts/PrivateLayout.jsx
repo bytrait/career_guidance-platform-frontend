@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useState } from "react";
 
-function MainLayout() {
+function PrivateLayout() {
 
   const handleLogout = () => {
     window.location.href = "https://auth.bytrait.com";
@@ -23,4 +23,4 @@ function MainLayout() {
   );
 }
 
-export default MainLayout;
+export default PrivateLayout;
