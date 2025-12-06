@@ -53,7 +53,7 @@ export default function AptitudeQuestion({ data, value, onChange }) {
             </div>
           )}
           <img
-            src={`${import.meta.env.VITE_API_BASE_URL}/assessment/static/${questionImage}`}
+            src={`/assets/Aptitude/${questionImage}`}
             alt="Question illustration"
             className={`max-h-64 object-contain transition-opacity duration-300 ${
               imgLoading ? "opacity-0" : "opacity-100"
