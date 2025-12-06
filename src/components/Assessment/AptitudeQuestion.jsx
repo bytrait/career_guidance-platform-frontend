@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import Spinner from "../common/Spinner";
+import { resolveImage } from "../../utils/imageResolver";
+
 
 export default function AptitudeQuestion({ data, value, onChange }) {
   if (!data) return null;
@@ -32,6 +34,9 @@ export default function AptitudeQuestion({ data, value, onChange }) {
     setImgLoading(true);
   }, [data.id, questionImage]);
 
+  const resolvedSrc = resolveImage(questionImage);
+
+
   return (
     <div className="mt-6">
       {/* English + Marathi */}
@@ -53,11 +58,10 @@ export default function AptitudeQuestion({ data, value, onChange }) {
             </div>
           )}
           <img
-            src={questionImage}
+            src={resolvedSrc}
             alt="Question illustration"
-            className={`max-h-64 object-contain transition-opacity duration-300 ${
-              imgLoading ? "opacity-0" : "opacity-100"
-            }`}
+            className={`max-h-64 object-contain transition-opacity duration-300 ${imgLoading ? "opacity-0" : "opacity-100"
+              }`}
             onLoad={() => setImgLoading(false)}
             onError={() => setImgLoading(false)}
           />
@@ -70,9 +74,8 @@ export default function AptitudeQuestion({ data, value, onChange }) {
           options.map((opt) => (
             <label
               key={opt.id}
-              className={`p-3 border rounded-lg cursor-pointer ${
-                value === opt.id ? "bg-blue-500 text-white" : "bg-white"
-              }`}
+              className={`p-3 border rounded-lg cursor-pointer ${value === opt.id ? "bg-blue-500 text-white" : "bg-white"
+                }`}
             >
               <input
                 type="radio"
