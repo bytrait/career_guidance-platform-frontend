@@ -112,8 +112,12 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
     setAccordions(acc);
 
     // auto-open first accordion
-    const firstKey = Object.keys(acc)[0];
-    setOpenTrait(firstKey || null);
+    // Always open Openness first (O)
+    const firstDisplayName =
+      TRAIT_DISPLAY["O"]?.[language] || TRAIT_JSON_KEY["O"];
+
+    setOpenTrait(firstDisplayName);
+
 
   }, [scores, language]);
 
@@ -146,39 +150,53 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
 
         {/* LEFT PANEL (scrollable, equal height) */}
         <div className="lg:h-[420px] space-y-4">
-          {Object.entries(accordions).map(([trait, info]) => {
-            const isOpen = openTrait === trait;
-            return (
-              <div
-                key={trait}
-                className="bg-white rounded-xl overflow-hidden border border-gray-300"
-              >
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-between px-4 py-4 cursor-pointer"
-                  onClick={() => toggleAccordion(trait)}
-                >
-                  <div className="flex items-center">
-                    <ChevronRight
-                      className={`text-blue-600 mr-3 transform transition-transform duration-200 ${isOpen ? "rotate-90" : ""
-                        }`}
-                      size={18}
-                    />
-                    <div className="font-semibold text-gray-800">{info.label}</div>
-                  </div>
-                </button>
 
+          {["O", "C", "E", "A", "N"]
+            .map((code) => {
+              const traitName =
+                TRAIT_DISPLAY[code]?.[language] || TRAIT_JSON_KEY[code];
+
+              const info = accordions[traitName];
+              if (!info) return null;
+
+              return [traitName, info];
+            })
+            .filter(Boolean)
+            .map(([trait, info]) => {
+              const isOpen = openTrait === trait;
+
+              return (
                 <div
-                  className={`px-4 overflow-hidden transition-all duration-300 ${isOpen ? "py-4" : "py-0"
-                    }`}
-                  style={{ maxHeight: isOpen ? "300px" : "0px" }}
+                  key={trait}
+                  className="bg-white rounded-xl overflow-hidden border border-gray-300"
                 >
-                  <div className="text-gray-700">{info.summary}</div>
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between px-4 py-4 cursor-pointer"
+                    onClick={() => toggleAccordion(trait)}
+                  >
+                    <div className="flex items-center">
+                      <ChevronRight
+                        className={`text-blue-600 mr-3 transform transition-transform duration-200 ${isOpen ? "rotate-90" : ""
+                          }`}
+                        size={18}
+                      />
+                      <div className="font-semibold text-gray-800">{info.label}</div>
+                    </div>
+                  </button>
+
+                  <div
+                    className={`px-4 overflow-hidden transition-all duration-300 ${isOpen ? "py-4" : "py-0"
+                      }`}
+                    style={{ maxHeight: isOpen ? "300px" : "0px" }}
+                  >
+                    <div className="text-gray-700">{info.summary}</div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
+
 
         {/* RIGHT PANEL */}
         <div

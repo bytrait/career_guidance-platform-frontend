@@ -1,31 +1,39 @@
 import { createBrowserRouter } from "react-router-dom";
+import ProtectedRoute from "../components/ProtectedRoute";
+
+// Layouts
+import PrivateLayout from "../layouts/PrivateLayout";
+import PublicLayout from "../layouts/PublicLayout";
+
+// Student Pages
+import WelcomePage from "../pages/WelcomePage";
 import AssessmentPage from "../pages/AssessmentPage";
 import ReportPage from "../pages/ReportPage";
-import WelcomePage from "../pages/WelcomePage";
-import ProtectedRoute from "../components/ProtectedRoute";
 import CongratulationsPage from "../pages/CongratulationsPage";
 import CareerContent from "../components/CareerContent/CareerContent";
 import CareerPage from "../pages/CareerPage";
+import CareerList from "../pages/CareerList";
+import CareerDetails from "../pages/CareerDetails";
+
+// Counsellor Pages
+import CounsellorStudents from "../pages/counsellor/CounsellorStudents";
 
 // Demo Pages
 import DemoWelcomePage from "../pages/demo/DemoWelcomePage";
 import DemoAssessmentPage from "../pages/demo/DemoAssessmentPage";
 import DemoReportPage from "../pages/demo/DemoReportPage";
 import DemoCareerPage from "../pages/demo/DemoCareerPage";
-import PrivateLayout from "../layouts/PrivateLayout";
-import PublicLayout from "../layouts/PublicLayout";
-import CareerList from "../pages/CareerList";
-import CareerDetails from "../pages/CareerDetails";
+import CounsellorStudentReport from "../pages/counsellor/CounsellorStudentReport";
 
 export const router = createBrowserRouter([
 
   // ---------------------------------------
-  // 1) PROTECTED ROUTES (Main Application)
+  // 1) STUDENT ROUTES (Authenticated, STUDENT)
   // ---------------------------------------
   {
     path: "/",
     element: (
-      <ProtectedRoute>
+      <ProtectedRoute roles={["STUDENT"]}>
         <PrivateLayout />
       </ProtectedRoute>
     ),
@@ -42,11 +50,28 @@ export const router = createBrowserRouter([
   },
 
   // ---------------------------------------
-  // 2) PUBLIC DEMO ROUTES
+  // 2) COUNSELLOR ROUTES (Authenticated, COUNSELLOR)
+  // ---------------------------------------
+  {
+    path: "/counsellor",
+    element: (
+      <ProtectedRoute roles={["COUNSELLOR"]}>
+        <PrivateLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { path: "students", element: <CounsellorStudents /> },
+      // future:
+      { path: "students/:studentId/report", element: <CounsellorStudentReport /> },
+    ],
+  },
+
+  // ---------------------------------------
+  // 3) PUBLIC DEMO ROUTES
   // ---------------------------------------
   {
     path: "/demo",
-    element: <PublicLayout />,  // ⚠️ No ProtectedRoute here
+    element: <PublicLayout />,
     children: [
       { path: "", element: <DemoWelcomePage /> },
       { path: "assessment", element: <DemoAssessmentPage /> },

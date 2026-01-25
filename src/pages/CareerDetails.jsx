@@ -25,6 +25,7 @@ const CareerDetails = () => {
 
     const en = career.translations.find((t) => t.language === "en");
     const mr = career.translations.find((t) => t.language === "mr");
+    console.log("Career details loaded:", en,mr);
 
     return (
         <div className="max-w-7xl mx-auto px-6 py-8">

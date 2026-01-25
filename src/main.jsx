@@ -6,6 +6,7 @@ import './index.css'
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { Provider } from "react-redux";
 import { store } from "./store";
+import './styles/print.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

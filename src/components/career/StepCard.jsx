@@ -1,5 +1,9 @@
 import React from "react";
 import SegmentedContent from "../CareerContent/SegmentedContent";
+import "../../styles/careerContent.css";
+import { cleanHtmlContent } from "../../utils/cleanHtmlContent";
+
+
 
 const StepCard = ({ step }) => {
 
@@ -27,8 +31,7 @@ const StepCard = ({ step }) => {
           <h4 style={{ marginBottom: "5px" }}>{en?.title}</h4>
 
           {en?.note && (
-                          <SegmentedContent html={en.note} />
-            
+            <div dangerouslySetInnerHTML={{ __html: cleanHtmlContent(en.note) }} />
           )}
 
 
@@ -41,8 +44,8 @@ const StepCard = ({ step }) => {
         <div>
           <h4 style={{ marginBottom: "5px" }}>{mr?.title}</h4>
           {mr?.note && (
-                          <SegmentedContent html={mr.note} />
-            
+            <div dangerouslySetInnerHTML={{ __html: mr.note }} />
+
           )}
 
           {step.duration_years && (

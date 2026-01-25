@@ -1,6 +1,7 @@
 // src/components/career/StageContentView.jsx
 import React, { useEffect, useRef, useState } from "react";
 import StageContentCard from "./StageContentCard";
+import { cleanHtmlContent } from "../../utils/cleanHtmlContent";
 
 export default function StageContentView({ step, language = "en" }) {
   const containerRef = useRef(null);
@@ -37,6 +38,8 @@ export default function StageContentView({ step, language = "en" }) {
     );
   }
 
+  console.log("Rendering StageContentView for step:", step);
+
   return (
     <div
       ref={containerRef}
@@ -48,7 +51,8 @@ export default function StageContentView({ step, language = "en" }) {
           ${visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"}
         `}
       >
-        <StageContentCard step={step} language={language} />
+        {/* <StageContentCard step={step} language={language} /> */}
+        <div dangerouslySetInnerHTML={{ __html: cleanHtmlContent(step.content) || "<p>No content available.</p>" }} />
       </div>
     </div>
   );

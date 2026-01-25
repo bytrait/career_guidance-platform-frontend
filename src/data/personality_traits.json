@@ -4,6 +4,7 @@
       "categories": [
         {
           "range": "27-40",
+          "icon": "bi-lightbulb",
           "label": {
             "en": "Ideator/Innovator",
             "mr": "कल्पक / नवोन्मेषक"
@@ -15,6 +16,7 @@
         },
         {
           "range": "14-26",
+          "icon": "bi-tools",
           "label": {
             "en": "Realistic Innovator",
             "mr": "वास्तववादी नवोन्मेषक"
@@ -26,6 +28,7 @@
         },
         {
           "range": "0-13",
+          "icon": "bi-check-circle",
           "label": {
             "en": "Pragmatist",
             "mr": "व्यावहारिक विचारक"
@@ -37,10 +40,12 @@
         }
       ]
     },
+
     "Conscientiousness": {
       "categories": [
         {
           "range": "27-40",
+          "icon": "bi-list-check",
           "label": {
             "en": "Organized",
             "mr": "संघटित"
@@ -52,6 +57,7 @@
         },
         {
           "range": "14-26",
+          "icon": "bi-sliders",
           "label": {
             "en": "Balanced",
             "mr": "संतुलित"
@@ -63,6 +69,7 @@
         },
         {
           "range": "0-13",
+          "icon": "bi-wind",
           "label": {
             "en": "Free-spirited",
             "mr": "मोकळ्या स्वभावाचा"
@@ -74,10 +81,12 @@
         }
       ]
     },
+
     "Extroversion": {
       "categories": [
         {
           "range": "27-40",
+          "icon": "bi-people",
           "label": {
             "en": "Extrovert",
             "mr": "बहिर्मुख"
@@ -89,6 +98,7 @@
         },
         {
           "range": "14-26",
+          "icon": "bi-person-arms-up",
           "label": {
             "en": "Ambivert",
             "mr": "मिश्र प्रवृत्तीचा"
@@ -100,6 +110,7 @@
         },
         {
           "range": "0-13",
+          "icon": "bi-person",
           "label": {
             "en": "Introvert",
             "mr": "अंतर्मुख"
@@ -111,10 +122,12 @@
         }
       ]
     },
+
     "Agreeableness": {
       "categories": [
         {
           "range": "27-40",
+          "icon": "bi-heart",
           "label": {
             "en": "Compassionate",
             "mr": "दयाळू"
@@ -126,6 +139,7 @@
         },
         {
           "range": "14-26",
+          "icon": "bi-chat-dots",
           "label": {
             "en": "Balanced Communicator",
             "mr": "संतुलित संवादक"
@@ -137,6 +151,7 @@
         },
         {
           "range": "0-13",
+          "icon": "bi-megaphone",
           "label": {
             "en": "Assertive Individualist",
             "mr": "ठाम स्वावलंबी"
@@ -148,10 +163,12 @@
         }
       ]
     },
+
     "Neuroticism": {
       "categories": [
         {
           "range": "27-40",
+          "icon": "bi-heart-pulse",
           "label": {
             "en": "Emotionally Insightful",
             "mr": "भावनिकदृष्ट्या जाणकार"
@@ -163,6 +180,7 @@
         },
         {
           "range": "14-26",
+          "icon": "bi-emoji-smile",
           "label": {
             "en": "Emotionally Balanced",
             "mr": "भावनिक संतुलित"

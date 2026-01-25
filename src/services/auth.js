@@ -20,3 +20,15 @@ export const isAuthenticated = async () => {
     throw error;
   }
 };
+
+export const getStudentById = async (studentId) => {
+  try {
+    const response = await AuthAPI.get(
+      `/auth/user/${studentId}`
+    );
+    return response.data?.data;
+  } catch (error) {
+    console.error("Failed to fetch student details:", error);
+    throw error;
+  }
+};

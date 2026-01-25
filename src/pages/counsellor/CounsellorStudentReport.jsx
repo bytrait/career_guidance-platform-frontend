@@ -1,33 +1,27 @@
-// src/pages/ReportPage.jsx
 import React, { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 import ReactDOM from "react-dom/client";
 
+import PersonalityStrengths from "../../components/report/PersonalityStrengths";
+import CareerInterests from "../../components/report/CareerInterests";
+import AptitudeChart from "../../components/report/AptitudeChart";
+import CareerOptions from "../../components/report/CareerOptions";
+import Spinner from "../../components/common/Spinner";
+
+import PrintDocument from "../../components/report/PrintDocument";
+import PrintCoverPage from "../../components/report/PrintCoverPage";
+
+import { getStudentById, isAuthenticated } from "../../services/auth";
+
+
 import {
-  setScores,
-  setLanguage,
-  setEconomicStatus,
-  setRecommendedCareers,
-  setSelectedCareer,
-} from "../store/reportSlice";
+  getStudentScoresForCounsellor,
+  getStudentPreferenceForCounsellor,
+  getStudentDetailsForCounsellor,
+} from "../../services/counsellorService";
+import { getRecommendedCareers } from "../../services/careerService";
 
-import { getScores } from "../services/assessmentService";
-import { getPreference } from "../services/preferenceService";
-import { getRecommendedCareers } from "../services/careerService";
-import { fetchUserDetailsById } from "../services/userAssessmentProgressService";
-
-import PersonalityStrengths from "../components/report/PersonalityStrengths";
-import CareerInterests from "../components/report/CareerInterests";
-import AptitudeChart from "../components/report/AptitudeChart";
-import CareerOptions from "../components/report/CareerOptions";
-import Spinner from "../components/common/Spinner";
-
-import PrintDocument from "../components/report/PrintDocument";
-import PrintCoverPage from "../components/report/PrintCoverPage";
-import ReportOverviewPage from "../components/report/ReportOverviewPage";
-import ReportIndexPage from "../components/report/ReportIndexPage";
-
-/* ------------------ PRINT STYLES ------------------ */
+/* ------------------ PRINT STYLES (SAME AS REPORT PAGE) ------------------ */
 function collectStylesForIframe() {
   const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
   const styles = Array.from(document.querySelectorAll("style"));
@@ -46,10 +40,7 @@ function collectStylesForIframe() {
     <link rel="stylesheet" href="/src/styles/printCareer.css" />
 
     <style>
-      @page { size: A4 portrait;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      }
+      @page { size: A4 portrait; margin: 12mm; }
 
       @media print {
         .print-page {
@@ -72,82 +63,90 @@ function collectStylesForIframe() {
   `;
 }
 
-/* ------------------ MAIN COMPONENT ------------------ */
-export default function ReportPage() {
-  const dispatch = useDispatch();
+export default function CounsellorStudentReport() {
+  const { studentId } = useParams();
 
   const offscreenRootRef = useRef(null);
   const iframeRef = useRef(null);
 
-  const [userDetails, setUserDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [student, setStudent] = useState(null);
+
+  const [scores, setScores] = useState([]);
+  const [language, setLanguage] = useState("en");
+  const [economicStatus, setEconomicStatus] = useState(null);
+  const [recommendedCareers, setRecommendedCareers] = useState([]);
+
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [selectedCareerIds, setSelectedCareerIds] = useState([]);
 
-  const { scores, language, economicStatus, recommendedCareers } = useSelector(
-    s => s.report
-  );
+  const [studentProfile, setStudentProfile] = useState(null);
+  const [counsellor, setCounsellor] = useState(null);
 
-  /* ------------------ LOAD INITIAL DATA ------------------ */
+
+  /* ------------------ LOAD STUDENT DATA ------------------ */
   useEffect(() => {
     async function load() {
-      const pref = await getPreference();
-      dispatch(setLanguage(pref.preferredLanguage || "en"));
-      dispatch(setEconomicStatus(pref.economicStatus || null));
+      try {
+        setLoading(true);
 
-      const scoreRes = await getScores();
-      if (scoreRes.data?.success) {
-        dispatch(setScores(scoreRes.data.data));
+        const [studentRes, prefRes, scoreRes, studentAuthRes, counsellorRes] = await Promise.all([
+          getStudentDetailsForCounsellor(studentId),
+          getStudentPreferenceForCounsellor(studentId),
+          getStudentScoresForCounsellor(studentId),
+          getStudentById(studentId),
+          isAuthenticated(),
+        ]);
+
+        setStudent(studentRes);
+        setLanguage(prefRes?.preferredLanguage || "en");
+        setEconomicStatus(prefRes?.economicStatus || null);
+        setScores(scoreRes || []);
+        setStudentProfile(studentAuthRes || null);
+        setCounsellor(counsellorRes || null);
+      } finally {
+        setLoading(false);
       }
-
-      const user = await fetchUserDetailsById();
-      setUserDetails(user);
     }
+
     load();
-  }, []);
+  }, [studentId]);
+
+
+  console.log("COUNSELLOR STUDENT REPORT STATE:", counsellor)
 
   /* ------------------ LOAD CAREERS ------------------ */
   useEffect(() => {
     async function loadCareers() {
-      if (!scores?.length || !language || !economicStatus) return;
+      if (!scores.length || !economicStatus || !language) return;
 
-      const res = await getRecommendedCareers(scores, economicStatus, language);
+      const res = await getRecommendedCareers(
+        scores,
+        economicStatus,
+        language
+      );
+
       let recs = [];
-
-      if (res.data?.recommendations) {
+      if (res?.data?.recommendations) {
         recs =
           economicStatus === "weak"
             ? [
-                ...(res.data.recommendations.vocational || []),
-                ...(res.data.recommendations.professional || []),
-              ]
+              ...(res.data.recommendations.vocational || []),
+              ...(res.data.recommendations.professional || []),
+            ]
             : res.data.recommendations.professional || [];
       }
 
-      dispatch(setRecommendedCareers(recs));
+      setRecommendedCareers(recs);
     }
+
     loadCareers();
-  }, [scores, language, economicStatus]);
+  }, [scores, economicStatus, language]);
 
   const isLoading =
-    !scores?.length || !language || !economicStatus || !recommendedCareers.length;
+    loading || !scores.length || !economicStatus || !recommendedCareers.length;
 
-  /* ------------------ SELECTION ------------------ */
-  function toggleCareer(id) {
-    setSelectedCareerIds(prev =>
-      prev.includes(id)
-        ? prev.filter(x => x !== id)
-        : [...prev, id]
-    );
-  }
-
-  function openPrintModal() {
-    if (!selectedCareerIds.length && recommendedCareers.length) {
-      setSelectedCareerIds(recommendedCareers.slice(0, 3).map(c => c.id));
-    }
-    setShowPrintModal(true);
-  }
-
-  /* ------------------ OFFSCREEN ROOT ------------------ */
+  /* ------------------ PRINT HELPERS (SAME AS REPORT PAGE) ------------------ */
   function ensureOffscreenRoot() {
     if (offscreenRootRef.current) return offscreenRootRef.current;
 
@@ -169,7 +168,14 @@ export default function ReportPage() {
     return iframe;
   }
 
-  /* ------------------ PRINT ------------------ */
+  function toggleCareer(id) {
+    setSelectedCareerIds(prev =>
+      prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : [...prev, id]
+    );
+  }
+
   async function handlePrint() {
     const container = ensureOffscreenRoot();
     container.innerHTML = "";
@@ -177,9 +183,11 @@ export default function ReportPage() {
     const root = ReactDOM.createRoot(container);
     root.render(
       <>
-        <PrintCoverPage userDetails={userDetails} language={language} />
-        <ReportOverviewPage/>
-        <ReportIndexPage/>
+        <PrintCoverPage
+          userDetails={studentProfile}
+          counsellorDetails={counsellor}
+          language={language}
+        />
         <PrintDocument
           scores={scores}
           language={language}
@@ -199,7 +207,7 @@ export default function ReportPage() {
       <html>
         <head>
           <meta charset="utf-8" />
-          <title>${userDetails?.fullName || "Report"}</title>
+          <title>${studentProfile?.fullName || "Student Report"}</title>
           ${styles}
         </head>
         <body>${html}</body>
@@ -212,9 +220,7 @@ export default function ReportPage() {
     doc.write(finalHTML);
     doc.close();
 
-    setTimeout(() => {
-      iframe.contentWindow.print();
-    }, 300);
+    setTimeout(() => iframe.contentWindow.print(), 300);
 
     root.unmount();
     container.remove();
@@ -223,62 +229,48 @@ export default function ReportPage() {
   }
 
   /* ------------------ RENDER ------------------ */
+  if (loading) {
+    return (
+      <div className="flex justify-center mt-12">
+        <Spinner />
+      </div>
+    );
+  }
+
   return (
-    <>
-      {/* Language Switch */}
-      <div className="flex justify-end px-6 py-4 no-print">
-        <div className="flex gap-2 bg-gray-100 p-1 rounded-full">
-          <button
-            onClick={() => dispatch(setLanguage("en"))}
-            className={`px-3 py-1 rounded-full ${language === "en" ? "bg-blue-600 text-white" : ""}`}
-          >
-            English
-          </button>
-          <button
-            onClick={() => dispatch(setLanguage("mr"))}
-            className={`px-3 py-1 rounded-full ${language === "mr" ? "bg-blue-600 text-white" : ""}`}
-          >
-            मराठी
-          </button>
-        </div>
-      </div>
-
-      {/* Print Button */}
-      <div className="max-w-7xl mx-auto px-2 mb-6 no-print">
-        <div className="flex justify-end">
-          <button
-            onClick={openPrintModal}
-            className="px-4 py-2 bg-blue-600 text-white rounded shadow"
-          >
-            {language === "mr" ? "प्रिंट अहवाल" : "Print Report"}
-          </button>
-        </div>
-      </div>
-
-      {/* Screen Content */}
-      <div className="max-w-7xl mx-auto px-2 space-y-16">
-        <h1 className="text-5xl font-semibold mb-8 text-gray-800">
-          {userDetails?.fullName}
+    <div className="max-w-7xl mx-auto px-4 pb-10">
+      <div className="flex justify-between items-center my-6">
+        <h1 className="text-4xl font-semibold text-gray-800">
+          {studentProfile?.fullName}
         </h1>
 
-        <PersonalityStrengths scores={scores} language={language} />
-        <CareerInterests scores={scores} language={language} />
-        <AptitudeChart scores={scores} language={language} />
+        <button
+          onClick={() => setShowPrintModal(true)}
+          className="px-4 py-2 bg-blue-600 text-white rounded"
+        >
+          Print Report
+        </button>
+      </div>
 
-        <section className="mb-16">
-          {isLoading ? (
-            <Spinner />
-          ) : (
+      {isLoading ? (
+        <Spinner />
+      ) : (
+        <div className="space-y-16">
+          <PersonalityStrengths scores={scores} language={language} />
+          <CareerInterests scores={scores} language={language} />
+          <AptitudeChart scores={scores} language={language} />
+
+          <section className="mb-16">
             <CareerOptions
               scores={scores}
               careers={recommendedCareers}
               economicStatus={economicStatus}
               language={language}
-              onSelectCareer={c => dispatch(setSelectedCareer(c))}
+              readOnly
             />
-          )}
-        </section>
-      </div>
+          </section>
+        </div>
+      )}
 
       {/* PRINT MODAL */}
       {showPrintModal && (
@@ -324,8 +316,6 @@ export default function ReportPage() {
           </div>
         </div>
       )}
-
-      <iframe ref={iframeRef} style={{ display: "none" }} title="print" />
-    </>
+    </div>
   );
 }

@@ -1,1 +1,191 @@
 @import "tailwindcss";
+
+/* ==============================
+   PRINTABLE CAREER CARDS
+============================== */
+
+@media print {
+  .print-page {
+    width: 210mm;
+    height: 297mm;
+    /* padding: 20mm 20mm 18mm 20mm; */
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+
+    page-break-after: always;
+  }
+
+  .print-page:last-child {
+    page-break-after: auto;
+  }
+}
+
+
+.career-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  page-break-inside: avoid;
+}
+
+/* Alternate backgrounds (print-safe) */
+.career-card:nth-child(odd) {
+  background: #f0f7ff;
+}
+
+/* --------------------------
+   HEADINGS
+--------------------------- */
+
+.career-card h3 {
+  font-family: "Inter", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.career-card h3 i {
+  font-size: 18px;
+  color: #2563eb;
+}
+
+/* --------------------------
+   TEXT CONTENT
+--------------------------- */
+
+.career-card p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #374151;
+  margin-bottom: 10px;
+}
+
+/* --------------------------
+   LISTS
+--------------------------- */
+
+.career-card ul {
+  padding-left: 18px;
+  margin: 8px 0 12px;
+}
+
+.career-card li {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.career-card li i {
+  font-size: 12px;
+  color: #3b82f6;
+  margin-right: 6px;
+}
+
+/* --------------------------
+   TABLES (PRINT SAFE)
+--------------------------- */
+
+.career-card table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.career-card th {
+  background: #f1f5f9;
+  padding: 8px 10px;
+  font-weight: 600;
+  text-align: left;
+  color: #1e293b;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.career-card td {
+  padding: 8px 10px;
+  border-top: 1px solid #e5e7eb;
+  color: #374151;
+  vertical-align: top;
+}
+
+.career-card tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+/* --------------------------
+   BLOCKQUOTES / CALLOUTS
+--------------------------- */
+
+.career-card blockquote {
+  border-left: 4px solid #3b82f6;
+  background: #f9fafb;
+  padding: 10px 14px;
+  font-style: italic;
+  color: #374151;
+  margin: 14px 0;
+}
+
+/* --------------------------
+   PRINT OPTIMIZATION
+--------------------------- */
+
+.career-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.career-step {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+  background: #e0ecff;
+  padding: 4px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.career-card-header h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* .career-detail-page {
+  min-height: 297mm;
+
+
+  background-image: url("/src/assets/careerbg.png");
+  background-repeat: repeat-y;
+  background-position: left top;
+  background-size: 210mm 297mm;
+  
+
+
+  padding-left: 50mm;
+
+  padding-right: 10mm;
+  padding-top: 20mm;
+  padding-bottom: 20mm;
+} */
+
+
+@media print {
+  .career-card {
+    box-shadow: none;
+    border-radius: 12px;
+  }
+}

@@ -2,42 +2,50 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 
 const STAGE_ICONS = {
-  // English Short Keys
-  "Overview": "bi bi-info-circle-fill",
-  "Eligibility & Path": "bi bi-mortarboard-fill",
-  "Entrance Exams": "bi bi-journal-check",
-  "Colleges & Scholarships": "bi bi-building",
-  "Skills & Tools": "bi bi-tools",
-  "Growth & Opportunities": "bi bi-graph-up-arrow",
-  "Future Trends": "bi bi-lightbulb-fill",
-  "Summary": "bi bi-stars",
+  /* ===============================
+     🎓 PROFESSIONAL – CANONICAL
+     =============================== */
+  Overview: "bi bi-info-circle-fill",
+  Education: "bi bi-mortarboard-fill",
+  Exams: "bi bi-journal-check",
+  Colleges: "bi bi-building",
+  Skills: "bi bi-tools",
+  Growth: "bi bi-graph-up-arrow",
+  Future: "bi bi-lightbulb-fill",
+  Summary: "bi bi-stars",
 
-  "Eligibility & Training": "bi bi-clipboard-check",
-  "Courses & Certificates": "bi bi-award-fill",
-  "Tools & Skills": "bi bi-tools",
-  "Job Roles & Industry": "bi bi-briefcase-fill",
-  "Salary & Earnings": "bi bi-cash-stack",
-  "Career Upgrade Path": "bi bi-bar-chart-line-fill",
-  "Future & Exposure": "bi bi-lightbulb",
+  /* ===============================
+     🛠️ VOCATIONAL – CANONICAL
+     =============================== */
+  Eligibility: "bi bi-clipboard-check",
+  Courses: "bi bi-award-fill",
+  Tools: "bi bi-tools",
+  Jobs: "bi bi-briefcase-fill",
+  Earnings: "bi bi-cash-stack",
 
-  // Marathi Short Keys
+  /* ===============================
+     🌐 MARATHI – PROFESSIONAL
+     =============================== */
   "आढावा": "bi bi-info-circle-fill",
-  "पात्रता व मार्ग": "bi bi-mortarboard-fill",
+  "शिक्षण": "bi bi-mortarboard-fill",
   "प्रवेश परीक्षा": "bi bi-journal-check",
-  "महाविद्यालये व शिष्यवृत्ती": "bi bi-building",
-  "कौशल्ये व साधने": "bi bi-tools",
-  "वाढ व संधी": "bi bi-graph-up-arrow",
-  "भविष्यातील ट्रेंड": "bi bi-lightbulb-fill",
+  "महाविद्यालये": "bi bi-building",
+  "कौशल्ये": "bi bi-tools",
+  "वाढ": "bi bi-graph-up-arrow",
+  "भविष्य": "bi bi-lightbulb-fill",
   "सारांश": "bi bi-stars",
 
-  "पात्रता व प्रशिक्षण": "bi bi-clipboard-check",
-  "कोर्सेस व प्रमाणपत्रे": "bi bi-award-fill",
-  "साधने व कौशल्ये": "bi bi-tools",
-  "नोकरी भूमिका व उद्योग": "bi bi-briefcase-fill",
-  "पगार व उत्पन्न": "bi bi-cash-stack",
-  "करिअर प्रगती मार्ग": "bi bi-bar-chart-line-fill",
-  "भविष्य व अनुभव": "bi bi-lightbulb",
+  /* ===============================
+     🌐 MARATHI – VOCATIONAL
+     =============================== */
+  "पात्रता": "bi bi-clipboard-check",
+  "कोर्सेस": "bi bi-award-fill",
+  "साधने": "bi bi-tools",
+  "नोकऱ्या": "bi bi-briefcase-fill",
+  "उत्पन्न": "bi bi-cash-stack",
 };
+
+
 
 export default function StageNavigationTabs({
   steps = [],
