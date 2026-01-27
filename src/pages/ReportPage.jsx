@@ -72,6 +72,25 @@ function collectStylesForIframe() {
   `;
 }
 
+/* ------------------ NEW: WAIT FOR IFRAME ASSETS ------------------ */
+async function waitForIframeAssets(doc) {
+  const images = Array.from(doc.images || []);
+
+  const imagePromises = images.map(img => {
+    if (img.complete && img.naturalHeight > 0) return Promise.resolve();
+    return new Promise(resolve => {
+      img.onload = img.onerror = resolve;
+    });
+  });
+
+  const fontPromise = doc.fonts ? doc.fonts.ready : Promise.resolve();
+
+  await Promise.all([...imagePromises, fontPromise]);
+
+  // small safety buffer so fonts actually paint
+  await new Promise(r => setTimeout(r, 500));
+}
+
 /* ------------------ MAIN COMPONENT ------------------ */
 export default function ReportPage() {
   const dispatch = useDispatch();
@@ -178,8 +197,8 @@ export default function ReportPage() {
     root.render(
       <>
         <PrintCoverPage userDetails={userDetails} language={language} />
-        <ReportOverviewPage/>
-        <ReportIndexPage/>
+        <ReportOverviewPage />
+        <ReportIndexPage />
         <PrintDocument
           scores={scores}
           language={language}
@@ -212,7 +231,9 @@ export default function ReportPage() {
     doc.write(finalHTML);
     doc.close();
 
-    setTimeout(() => {
+    // ✅ SAME setTimeout, just waiting correctly
+    setTimeout(async () => {
+      await waitForIframeAssets(doc);
       iframe.contentWindow.print();
     }, 300);
 

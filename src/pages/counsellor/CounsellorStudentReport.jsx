@@ -13,7 +13,6 @@ import PrintCoverPage from "../../components/report/PrintCoverPage";
 
 import { getStudentById, isAuthenticated } from "../../services/auth";
 
-
 import {
   getStudentScoresForCounsellor,
   getStudentPreferenceForCounsellor,
@@ -21,7 +20,7 @@ import {
 } from "../../services/counsellorService";
 import { getRecommendedCareers } from "../../services/careerService";
 
-/* ------------------ PRINT STYLES (SAME AS REPORT PAGE) ------------------ */
+/* ------------------ PRINT STYLES ------------------ */
 function collectStylesForIframe() {
   const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
   const styles = Array.from(document.querySelectorAll("style"));
@@ -63,6 +62,25 @@ function collectStylesForIframe() {
   `;
 }
 
+/* ------------------ NEW: WAIT FOR IFRAME ASSETS ------------------ */
+async function waitForIframeAssets(doc) {
+  const images = Array.from(doc.images || []);
+
+  const imagePromises = images.map(img => {
+    if (img.complete && img.naturalHeight > 0) return Promise.resolve();
+    return new Promise(resolve => {
+      img.onload = img.onerror = resolve;
+    });
+  });
+
+  const fontPromise = doc.fonts ? doc.fonts.ready : Promise.resolve();
+
+  await Promise.all([...imagePromises, fontPromise]);
+
+  // small buffer so fonts actually paint
+  await new Promise(r => setTimeout(r, 500));
+}
+
 export default function CounsellorStudentReport() {
   const { studentId } = useParams();
 
@@ -83,14 +101,19 @@ export default function CounsellorStudentReport() {
   const [studentProfile, setStudentProfile] = useState(null);
   const [counsellor, setCounsellor] = useState(null);
 
-
   /* ------------------ LOAD STUDENT DATA ------------------ */
   useEffect(() => {
     async function load() {
       try {
         setLoading(true);
 
-        const [studentRes, prefRes, scoreRes, studentAuthRes, counsellorRes] = await Promise.all([
+        const [
+          studentRes,
+          prefRes,
+          scoreRes,
+          studentAuthRes,
+          counsellorRes
+        ] = await Promise.all([
           getStudentDetailsForCounsellor(studentId),
           getStudentPreferenceForCounsellor(studentId),
           getStudentScoresForCounsellor(studentId),
@@ -112,9 +135,6 @@ export default function CounsellorStudentReport() {
     load();
   }, [studentId]);
 
-
-  console.log("COUNSELLOR STUDENT REPORT STATE:", counsellor)
-
   /* ------------------ LOAD CAREERS ------------------ */
   useEffect(() => {
     async function loadCareers() {
@@ -131,9 +151,9 @@ export default function CounsellorStudentReport() {
         recs =
           economicStatus === "weak"
             ? [
-              ...(res.data.recommendations.vocational || []),
-              ...(res.data.recommendations.professional || []),
-            ]
+                ...(res.data.recommendations.vocational || []),
+                ...(res.data.recommendations.professional || []),
+              ]
             : res.data.recommendations.professional || [];
       }
 
@@ -146,7 +166,7 @@ export default function CounsellorStudentReport() {
   const isLoading =
     loading || !scores.length || !economicStatus || !recommendedCareers.length;
 
-  /* ------------------ PRINT HELPERS (SAME AS REPORT PAGE) ------------------ */
+  /* ------------------ PRINT HELPERS ------------------ */
   function ensureOffscreenRoot() {
     if (offscreenRootRef.current) return offscreenRootRef.current;
 
@@ -220,7 +240,11 @@ export default function CounsellorStudentReport() {
     doc.write(finalHTML);
     doc.close();
 
-    setTimeout(() => iframe.contentWindow.print(), 300);
+    // ✅ SAME timeout, just waits correctly
+    setTimeout(async () => {
+      await waitForIframeAssets(doc);
+      iframe.contentWindow.print();
+    }, 300);
 
     root.unmount();
     container.remove();
