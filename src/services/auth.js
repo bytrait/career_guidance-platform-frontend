@@ -32,3 +32,13 @@ export const getStudentById = async (studentId) => {
     throw error;
   }
 };
+
+export const getReferenceCode = async () => {
+  try {
+    const response = await AuthAPI.get("/consellor/reference-code");
+    return response.data.data.code;
+  } catch (error) {
+    console.error("Failed to fetch reference code:", error);
+    throw error;
+  }
+};
