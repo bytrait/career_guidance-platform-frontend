@@ -12,6 +12,8 @@ export default function CareerOptions({
   onSelectCareer = () => { },
 }) {
 
+  console.log(careers)
+
   /* ------------------ PREPARE CHART DATA ------------------ */
   const prepareChartData = () => {
     if (!scores.length || careers.length === 0) return [];
@@ -56,6 +58,7 @@ export default function CareerOptions({
         });
 
         return {
+          category_id: id,
           name:
             language === "mr"
               ? field.careerField?.mr
@@ -69,6 +72,32 @@ export default function CareerOptions({
 
 
   const chartData = prepareChartData();
+  const categoryPriority = new Map();
+
+  chartData.forEach((item, index) => {
+    categoryPriority.set(item.category_id, index);
+  });
+
+  const orderedCareers = [...careers].sort((a, b) => {
+  const priorityA = categoryPriority.get(a.category_id);
+  const priorityB = categoryPriority.get(b.category_id);
+
+  // Case 1: both categories exist in chart
+  if (priorityA !== undefined && priorityB !== undefined) {
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB; // category order
+    }
+
+    // Same category → sort by similarity (high to low)
+    return (b.similarity || 0) - (a.similarity || 0);
+  }
+
+  // Case 2: one missing category → push missing to bottom
+  if (priorityA === undefined) return 1;
+  if (priorityB === undefined) return -1;
+
+  return 0;
+});
 
   /* ------------------ EMPTY STATE ------------------ */
   if (!scores.length) {
@@ -78,8 +107,6 @@ export default function CareerOptions({
       </div>
     );
   }
-
-  console.log(careers)
   /* ------------------ RENDER ------------------ */
   return (
     <div className="w-full min-h-screen flex flex-col items-center">
@@ -124,7 +151,7 @@ export default function CareerOptions({
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-7">
-                {careers
+                {orderedCareers
                   .filter(c => c.career_type === "professional")
                   .map(career => (
                     <CareerCard
@@ -149,7 +176,7 @@ export default function CareerOptions({
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-7">
-                {careers
+                {orderedCareers
                   .filter(c => c.career_type === "vocational")
                   .map(career => (
                     <CareerCard

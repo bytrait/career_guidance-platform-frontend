@@ -6,6 +6,9 @@ import PrintableAptitudeStrengths from "./PrintableAptitudeStrengths";
 import PrintableCareerOptions from "./PrintableCareerOptions";
 import PrintableCareerDetail from "./PrintableCareerDetail";
 
+import careerFields from "../../data/career_fields.json";
+import { useMemo } from "react";
+
 
 /** 
  * PrintDocument
@@ -28,6 +31,79 @@ export default function PrintDocument({
   selectedCareerIds = [],
   selectedCareersHtml = "",
 }) {
+
+  const orderedCareers = useMemo(() => {
+  if (!recommendedCareers.length) return [];
+
+  // -------- Build RIASEC Map --------
+  const riasecScores = scores
+    .filter((s) => s.assessmentType === "RIASEC")
+    .reduce((acc, s) => {
+      acc[s.traitOrCategoryCode] = s.score;
+      return acc;
+    }, {});
+
+  // -------- Build Chart Data (same logic as PrintableCareerOptions) --------
+  const categoryIds = [
+    ...new Set(
+      recommendedCareers
+        .map((c) => c.category_id)
+        .filter((id) => id !== null && id !== undefined)
+    ),
+  ];
+
+  const chartData = categoryIds
+    .map((id) => {
+      const field = careerFields.find(
+        (f) => f.category_id === id
+      );
+
+      if (!field || !field.scores) return null;
+
+      let weighted = 0;
+
+      ["R", "I", "A", "S", "E", "C"].forEach((key) => {
+        if (riasecScores[key] != null && field.scores[key] != null) {
+          weighted += (riasecScores[key] / 30) * field.scores[key];
+        }
+      });
+
+      return {
+        category_id: id,
+        value: Math.round(weighted * 100),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.value - a.value);
+
+  // -------- Priority Map --------
+  const categoryPriority = new Map();
+  chartData.forEach((item, index) => {
+    categoryPriority.set(item.category_id, index);
+  });
+
+  // -------- Final Career Sort --------
+  return [...recommendedCareers].sort((a, b) => {
+    const priorityA = categoryPriority.get(a.category_id);
+    const priorityB = categoryPriority.get(b.category_id);
+
+    if (priorityA !== undefined && priorityB !== undefined) {
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+
+      return (b.similarity || 0) - (a.similarity || 0);
+    }
+
+    if (priorityA === undefined) return 1;
+    if (priorityB === undefined) return -1;
+
+    return 0;
+  });
+
+}, [recommendedCareers, scores]);
+
+
   return (
     <div id="print-root">
       {/* SINGLE-PAGE SECTIONS */}
@@ -49,12 +125,12 @@ export default function PrintDocument({
       {/* MULTI-PAGE SECTION (handles its own pages) */}
       <PrintableCareerOptions
         scores={scores}
-        careers={recommendedCareers}
+        careers={orderedCareers}
         language={language}
       />
 
       {/* CAREER DETAIL PAGES (each renders its own print-page) */}
-      {recommendedCareers
+      {orderedCareers
         .filter(c => selectedCareerIds.includes(c.id))
         .map(career => (
           <div className="mb-[60px]" key={career.id}>

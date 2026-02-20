@@ -135,16 +135,24 @@ export default function PrintableCareerOptions({
         return acc;
       }, {});
 
-    const categories = [...new Set(careers.map((c) => c.category))];
+    const categoryIds = [
+      ...new Set(
+        careers
+          .map((c) => c.category_id)
+          .filter((id) => id !== null && id !== undefined)
+      ),
+    ];
 
-    return categories
-      .map((cat) => {
+    return categoryIds
+      .map((id) => {
         const field = careerFields.find(
-          (f) => f.careerField?.en === cat || f.careerField?.mr === cat
+          (f) => f.category_id === id
         );
+
         if (!field || !field.scores) return null;
 
         let weighted = 0;
+
         ["R", "I", "A", "S", "E", "C"].forEach((key) => {
           if (riasecScores[key] != null && field.scores[key] != null) {
             weighted += (riasecScores[key] / 30) * field.scores[key];
@@ -152,7 +160,11 @@ export default function PrintableCareerOptions({
         });
 
         return {
-          name: language === "mr" ? field.careerField.mr : field.careerField.en,
+          category_id: id, // ✅ IMPORTANT
+          name:
+            language === "mr"
+              ? field.careerField?.mr
+              : field.careerField?.en,
           value: Math.round(weighted * 100),
           icon: field.icon,
         };
