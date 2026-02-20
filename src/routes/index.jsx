@@ -24,6 +24,17 @@ import DemoAssessmentPage from "../pages/demo/DemoAssessmentPage";
 import DemoReportPage from "../pages/demo/DemoReportPage";
 import DemoCareerPage from "../pages/demo/DemoCareerPage";
 import CounsellorStudentReport from "../pages/counsellor/CounsellorStudentReport";
+import CounsellorSchools from "../pages/counsellor/CounsellorSchools";
+import SchoolStudents from "../pages/counsellor/SchoolStudents";
+
+// Counsellor Dashboard + Billing
+import Dashboard from "../pages/counsellor/Dashboard";
+import BillingOverview from "../pages/counsellor/billing/BillingOverview";
+import BuyCredits from "../pages/counsellor/billing/BuyCredits";
+import PaymentHistory from "../pages/counsellor/billing/PaymentHistory";
+import CreditLedger from "../pages/counsellor/billing/CreditLedger";
+import CounsellorLayout from "../components/counsellor/layout/CounsellorLayout";
+
 
 export const router = createBrowserRouter([
 
@@ -56,16 +67,24 @@ export const router = createBrowserRouter([
     path: "/counsellor",
     element: (
       <ProtectedRoute roles={["COUNSELLOR"]}>
-        <PrivateLayout />
+        <CounsellorLayout />
       </ProtectedRoute>
     ),
     children: [
-      { path: "students", element: <CounsellorStudents /> },
-      // future:
-      { path: "students/:studentId/report", element: <CounsellorStudentReport /> },
-    ],
-  },
+      { path: "dashboard", element: <Dashboard /> },
 
+      { path: "students", element: <CounsellorStudents /> },
+      { path: "students/:studentId/report", element: <CounsellorStudentReport /> },
+
+      { path: "schools", element: <CounsellorSchools /> },
+      { path: "schools/:schoolId", element: <SchoolStudents /> },
+
+      { path: "billing", element: <BillingOverview /> },
+      { path: "billing/buy", element: <BuyCredits /> },
+      { path: "billing/payments", element: <PaymentHistory /> },
+      { path: "billing/ledger", element: <CreditLedger /> },
+    ]
+  },
   // ---------------------------------------
   // 3) PUBLIC DEMO ROUTES
   // ---------------------------------------

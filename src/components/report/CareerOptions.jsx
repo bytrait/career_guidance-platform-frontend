@@ -9,7 +9,7 @@ export default function CareerOptions({
   economicStatus,
   language,
   readOnly = false,
-  onSelectCareer = () => {},
+  onSelectCareer = () => { },
 }) {
 
   /* ------------------ PREPARE CHART DATA ------------------ */
@@ -24,17 +24,22 @@ export default function CareerOptions({
       return acc;
     }, {});
 
-    const categories = [...new Set(careers.map(c => c.category))];
+    // ✅ Use category_id instead of category name
+    const categoryIds = [
+      ...new Set(
+        careers
+          .map(c => c.category_id)
+          .filter(id => id !== null && id !== undefined)
+      ),
+    ];
 
-    return categories
-      .map(cat => {
+    return categoryIds
+      .map(id => {
         const field = careerFields.find(
-          f =>
-            f.careerField?.en === cat ||
-            f.careerField?.mr === cat
+          f => f.category_id === id
         );
 
-        if (!field?.scores) return null;
+        if (!field || !field.scores) return null;
 
         let weighted = 0;
 
@@ -42,7 +47,10 @@ export default function CareerOptions({
           const userTrait = userScoresObj[key];
           const idealWeight = field.scores[key];
 
-          if (userTrait !== undefined && idealWeight !== undefined) {
+          if (
+            typeof userTrait === "number" &&
+            typeof idealWeight === "number"
+          ) {
             weighted += (userTrait / 30) * idealWeight;
           }
         });
@@ -50,14 +58,15 @@ export default function CareerOptions({
         return {
           name:
             language === "mr"
-              ? field.careerField.mr
-              : field.careerField.en,
+              ? field.careerField?.mr
+              : field.careerField?.en,
           value: Math.round(weighted * 100),
         };
       })
       .filter(Boolean)
       .sort((a, b) => b.value - a.value);
   };
+
 
   const chartData = prepareChartData();
 

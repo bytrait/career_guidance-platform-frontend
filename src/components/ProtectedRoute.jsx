@@ -20,7 +20,7 @@ function ProtectedRoute({ children, roles }) {
   // 🔁 Default landing pages per role
   const ROLE_HOME = {
     STUDENT: "/",
-    COUNSELLOR: "/counsellor/students",
+    COUNSELLOR: "/counsellor/dashboard",
   };
 
   useEffect(() => {
