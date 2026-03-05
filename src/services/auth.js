@@ -42,3 +42,13 @@ export const getReferenceCode = async () => {
     throw error;
   }
 };
+
+export const getCurrentUser = async () => {
+  const res = await AuthAPI.get("/auth/me");
+  return res.data;
+};
+
+export const markWelcomeShown = async () => {
+  const res = await AuthAPI.post("/counsellor/welcome-shown/mark");
+  return res.data;
+};
