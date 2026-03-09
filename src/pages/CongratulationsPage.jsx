@@ -138,7 +138,7 @@ export default function CongratulationsPage() {
               <span>Generating Report...</span>
             </>
           ) : (
-            "🚀 Generate AI Career Report"
+            "Generate Career Report"
           )}
         </button>
 
