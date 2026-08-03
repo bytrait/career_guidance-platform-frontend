@@ -19,7 +19,8 @@ export default function WelcomePage() {
     fetchUserProgress()
       .then((progress) => {
         if (progress?.currentStage === null) {
-          navigate("/report"); // redirect if already done
+          // navigate("/report"); // redirect if already done
+          navigate("/report-ready"); // redirect if already done
         } else {
           setLoading(false); // show welcome content
         }

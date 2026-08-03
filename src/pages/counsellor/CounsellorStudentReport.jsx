@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import ReactDOM from "react-dom/client";
 
 import PersonalityStrengths from "../../components/report/PersonalityStrengths";
@@ -19,6 +20,7 @@ import {
   getStudentDetailsForCounsellor,
 } from "../../services/counsellorService";
 import { getRecommendedCareers } from "../../services/careerService";
+import { setSelectedCareer } from "../../store/reportSlice";
 
 /* ------------------ PRINT STYLES ------------------ */
 function collectStylesForIframe() {
@@ -83,16 +85,18 @@ async function waitForIframeAssets(doc) {
 
 export default function CounsellorStudentReport() {
   const { studentId } = useParams();
+  const dispatch = useDispatch();
 
   const offscreenRootRef = useRef(null);
   const iframeRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
+  const [careersLoading, setCareersLoading] = useState(false);
   const [student, setStudent] = useState(null);
 
   const [scores, setScores] = useState([]);
   const [language, setLanguage] = useState("en");
-  const [economicStatus, setEconomicStatus] = useState(null);
+  const [economicStatus, setEconomicStatus] = useState("stable");
   const [recommendedCareers, setRecommendedCareers] = useState([]);
 
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -107,26 +111,30 @@ export default function CounsellorStudentReport() {
       try {
         setLoading(true);
 
-        const [
-          studentRes,
-          prefRes,
-          scoreRes,
-          studentAuthRes,
-          counsellorRes
-        ] = await Promise.all([
-          getStudentDetailsForCounsellor(studentId),
-          getStudentPreferenceForCounsellor(studentId),
-          getStudentScoresForCounsellor(studentId),
-          getStudentById(studentId),
-          isAuthenticated(),
-        ]);
+        const [studentRes, scoreRes, studentAuthRes, counsellorRes] =
+          await Promise.all([
+            getStudentDetailsForCounsellor(studentId),
+            getStudentScoresForCounsellor(studentId),
+            getStudentById(studentId),
+            isAuthenticated(),
+          ]);
+
+        // Preference may be missing (students no longer save it on congratulations)
+        let prefRes = null;
+        try {
+          prefRes = await getStudentPreferenceForCounsellor(studentId);
+        } catch (err) {
+          console.warn("Student preference not found, using defaults", err);
+        }
 
         setStudent(studentRes);
         setLanguage(prefRes?.preferredLanguage || "en");
-        setEconomicStatus(prefRes?.economicStatus || null);
+        setEconomicStatus(prefRes?.economicStatus || "stable");
         setScores(scoreRes || []);
         setStudentProfile(studentAuthRes || null);
         setCounsellor(counsellorRes || null);
+      } catch (err) {
+        console.error("Failed to load student report data", err);
       } finally {
         setLoading(false);
       }
@@ -140,31 +148,39 @@ export default function CounsellorStudentReport() {
     async function loadCareers() {
       if (!scores.length || !economicStatus || !language) return;
 
-      const res = await getRecommendedCareers(
-        scores,
-        economicStatus,
-        language
-      );
+      setCareersLoading(true);
+      try {
+        const res = await getRecommendedCareers(
+          scores,
+          economicStatus,
+          language
+        );
 
-      let recs = [];
-      if (res?.data?.recommendations) {
-        recs =
-          economicStatus === "weak"
-            ? [
-                ...(res.data.recommendations.vocational || []),
-                ...(res.data.recommendations.professional || []),
-              ]
-            : res.data.recommendations.professional || [];
+        let recs = [];
+        if (res?.data?.recommendations) {
+          recs =
+            economicStatus === "weak"
+              ? [
+                  ...(res.data.recommendations.vocational || []),
+                  ...(res.data.recommendations.professional || []),
+                ]
+              : res.data.recommendations.professional || [];
+        }
+
+        setRecommendedCareers(recs);
+      } catch (err) {
+        console.error("Failed to load recommended careers", err);
+        setRecommendedCareers([]);
+      } finally {
+        setCareersLoading(false);
       }
-
-      setRecommendedCareers(recs);
     }
 
     loadCareers();
   }, [scores, economicStatus, language]);
 
-  const isLoading =
-    loading || !scores.length || !economicStatus || !recommendedCareers.length;
+  // Don't require careers.length — empty list should still show the report
+  const isLoading = loading || careersLoading || !scores.length;
 
   /* ------------------ PRINT HELPERS ------------------ */
   function ensureOffscreenRoot() {
@@ -290,7 +306,8 @@ export default function CounsellorStudentReport() {
               careers={recommendedCareers}
               economicStatus={economicStatus}
               language={language}
-              readOnly
+              careerPathPrefix="/counsellor/career"
+              onSelectCareer={(career) => dispatch(setSelectedCareer(career))}
             />
           </section>
         </div>

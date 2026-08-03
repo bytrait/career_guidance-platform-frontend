@@ -198,7 +198,7 @@ export default function ReportPage() {
       <>
         <PrintCoverPage userDetails={userDetails} language={language} />
         <ReportOverviewPage />
-        <ReportIndexPage />
+        {/* <ReportIndexPage /> */}
         <PrintDocument
           scores={scores}
           language={language}

@@ -8,7 +8,7 @@ export default function AptitudeQuestion({ data, value, onChange }) {
   const options = Array.isArray(data.options) ? data.options : [];
 
   let enQuestion = "";
-  let mrQuestion = "";
+  // let mrQuestion = "";
   let questionImage = "";
 
   if (data.text) {
@@ -19,12 +19,12 @@ export default function AptitudeQuestion({ data, value, onChange }) {
       if (enImg) questionImage = enImg.trim();
     }
 
-    // Marathi
-    if (typeof data.text.mr === "string") {
-      const [mrText, mrImg] = data.text.mr.split("img:");
-      mrQuestion = mrText?.trim() || "";
-      if (!questionImage && mrImg) questionImage = mrImg.trim(); // fallback
-    }
+    // Marathi (hidden — English only)
+    // if (typeof data.text.mr === "string") {
+    //   const [mrText, mrImg] = data.text.mr.split("img:");
+    //   mrQuestion = mrText?.trim() || "";
+    //   if (!questionImage && mrImg) questionImage = mrImg.trim(); // fallback
+    // }
   }
 
   const [imgLoading, setImgLoading] = useState(true);
@@ -39,15 +39,15 @@ export default function AptitudeQuestion({ data, value, onChange }) {
 
   return (
     <div className="mt-6">
-      {/* English + Marathi */}
+      {/* English only */}
       {enQuestion && (
         <h3 className="text-xl font-semibold text-gray-700">{enQuestion}</h3>
       )}
-      {mrQuestion && (
+      {/* {mrQuestion && (
         <h4 className="text-lg font-semibold text-gray-600 mb-2">
           {mrQuestion}
         </h4>
-      )}
+      )} */}
 
       {/* Image with loading spinner */}
       {questionImage && (
@@ -86,9 +86,9 @@ export default function AptitudeQuestion({ data, value, onChange }) {
                 className="hidden"
               />
               {opt.text?.en && <span className="block">{opt.text.en}</span>}
-              {opt.text?.mr && (
+              {/* {opt.text?.mr && (
                 <span className="block text-gray-600">{opt.text.mr}</span>
-              )}
+              )} */}
             </label>
           ))
         ) : (

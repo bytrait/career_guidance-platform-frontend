@@ -8,53 +8,121 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { ChevronRight } from "lucide-react";
-import riasecData from "../../data/riasec_interests.json";
 
-// Localized UI text
+import riasecData from "../../data/riasec_interests_v2.json";
+import InterestImg from "../../assets/interest.png";
+
+// UI text
 const UI_TEXT = {
   en: {
-    heading: "Your career interests",
-    description: "These are your RIASEC scores showing your strongest interests.",
+    heading: "Your Career Interests",
+    description: "These are your top interest areas based on your responses.",
+    section: "Your Top Interests",
   },
   mr: {
-    heading: "तुमचे करिअर आवडी",
-    description: "ही तुमची RIASEC गुण आहेत जे तुमच्या सर्वात मजबूत आवडी दर्शवतात.",
+    heading: "तुमच्या करिअर आवडी",
+    description: "तुमच्या प्रतिसादांवर आधारित तुमच्या मुख्य आवडी खाली दिल्या आहेत.",
+    section: "तुमच्या प्रमुख आवडी",
   },
 };
 
-// Helper to get summary + name from JSON
-function getTraitInfo(code, lang = "en") {
-  const trait = riasecData.riasec.find((t) => t.code === code);
-  if (!trait) return null;
-  return {
-    name: trait.name?.[lang] || trait.name?.en || code,
-    summary: trait.summary?.[lang] || trait.summary?.en || "",
-  };
+// helper
+function getTraitInfo(code) {
+  return riasecData.riasec.find((t) => t.code === code);
+}
+
+// 🔥 SAME DESIGN AS PERSONALITY
+function InterestCard({ trait, language }) {
+  const c = trait.content;
+  if (!c) return null;
+
+  const renderShort = (list) => list?.slice(0, 2).join(", ");
+
+  return (
+    <div className="bg-white rounded-2xl p-6">
+
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-blue-700 font-semibold text-xl flex items-center">
+          <i className="bi bi-compass mr-2"></i>
+          {trait.name?.[language] || trait.name?.en}
+        </h3>
+
+        <div className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-medium">
+          {trait.code}
+        </div>
+      </div>
+
+      {/* MEANING */}
+      <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
+        <p className="text-gray-800 text-base leading-relaxed font-medium">
+          {c.meaning?.[language]}
+        </p>
+      </div>
+
+      {/* QUICK GRID */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+
+        <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+          <p className="text-gray-500 text-sm mb-1 flex items-center">
+            <i className="bi bi-eye mr-1"></i>
+            {language === "mr" ? "वर्तन" : "Behavior"}
+          </p>
+          <p className="text-gray-700 font-medium text-sm">
+            {renderShort(c.how_it_shows?.[language])}
+          </p>
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+          <p className="text-gray-500 text-sm mb-1 flex items-center">
+            <i className="bi bi-book mr-1"></i>
+            {language === "mr" ? "शिकणे" : "Learning"}
+          </p>
+          <p className="text-gray-700 font-medium text-sm">
+            {renderShort(c.learning_preference?.[language])}
+          </p>
+        </div>
+
+      </div>
+
+      {/* STRENGTH */}
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
+        <p className="text-sm text-blue-700 mb-1 flex items-center font-medium">
+          <i className="bi bi-stars mr-1"></i>
+          {language === "mr" ? "तुमची ताकद" : "Your Strength"}
+        </p>
+        <p className="text-gray-800 text-sm font-semibold">
+          {renderShort(c.strengths?.[language])}
+        </p>
+      </div>
+
+      {/* REFLECTION */}
+      <div className="pt-3 border-t border-gray-100">
+        <p className="text-sm text-gray-500 mb-1 flex items-center">
+          <i className="bi bi-question-circle mr-1"></i>
+          {language === "mr" ? "विचार करा" : "Reflection"}
+        </p>
+        <p className="text-sm text-gray-700">
+          {c.reflection_prompts?.[language]?.[0]}
+        </p>
+      </div>
+
+    </div>
+  );
 }
 
 export default function CareerInterests({ scores = [], language = "en" }) {
   const [data, setData] = useState([]);
-  const [accordions, setAccordions] = useState([]);
-  const [openCode, setOpenCode] = useState(null);
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [topInterests, setTopInterests] = useState([]);
 
   useEffect(() => {
-    const checkScreen = () => setIsSmallScreen(window.innerWidth < 640);
-    checkScreen();
-    window.addEventListener("resize", checkScreen);
-    return () => window.removeEventListener("resize", checkScreen);
-  }, []);
-
-
-  useEffect(() => {
-    if (!scores || scores.length === 0) return;
+    if (!scores?.length) return;
 
     const riasecScores = scores.filter(
       (item) => item.assessmentType === "RIASEC"
     );
 
-    // Radar chart data
+    // Chart data (UNCHANGED)
     const chartData = riasecData.riasec.map((trait) => {
       const item = riasecScores.find(
         (s) => s.traitOrCategoryCode === trait.code
@@ -62,103 +130,46 @@ export default function CareerInterests({ scores = [], language = "en" }) {
       return {
         subject: trait.name?.[language] || trait.name?.en,
         value: item ? item.score : 0,
-        code: trait.code,
       };
     });
+
     setData(chartData);
 
-    // Top 3 interests
+    // Top 3
     const top3 = [...riasecScores]
       .sort((a, b) => b.score - a.score)
       .slice(0, 3)
-      .map((item) => {
-        const info = getTraitInfo(item.traitOrCategoryCode, language);
-        return {
-          code: item.traitOrCategoryCode,
-          score: item.score,
-          label: info?.name || item.traitOrCategoryCode,
-          summary: info?.summary || "",
-        };
-      });
-    setAccordions(top3);
-    const openCode = top3.length > 0 ? top3[0].code : null;
-    setOpenCode(openCode);
-  }, [scores, language]);
+      .map((item) => getTraitInfo(item.traitOrCategoryCode));
 
-  const toggleAccordion = (code) => {
-    setOpenCode((prev) => (prev === code ? null : code));
-  };
+    setTopInterests(top3);
+  }, [scores, language]);
 
   return (
     <div className="w-full p-6 flex flex-col items-center bg-gray-50 border border-gray-200 rounded-sm">
+
       {/* Header */}
-      <div className="max-w-7xl w-full flex items-center justify-between">
-        <div>
-          <h2 className="text-4xl font-bold text-gray-900">
-            {UI_TEXT[language]?.heading || UI_TEXT.en.heading}
-          </h2>
-          <p className="text-gray-600 mt-2">
-            {UI_TEXT[language]?.description || UI_TEXT.en.description}
-          </p>
-        </div>
-        {/* 🔹 Language toggle removed — handled in ReportPage */}
+      <div className="max-w-7xl w-full">
+        <h2 className="text-3xl font-semibold text-gray-800">
+          {UI_TEXT[language]?.heading}
+        </h2>
+        <p className="text-gray-600 mt-2">
+          {UI_TEXT[language]?.description}
+        </p>
       </div>
 
-      {/* Content */}
-      <div className="max-w-7xl w-full mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
-        {/* Left side - Accordions */}
-        <div className="space-y-4">
-          {accordions.map((item) => {
-            const isOpen = openCode === item.code;
-            return (
-              <div
-                key={item.code}
-                className="bg-white rounded-xl overflow-hidden border border-gray-300"
-              >
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-between px-4 py-3 cursor-pointer focus:outline-none"
-                  onClick={() => toggleAccordion(item.code)}
-                >
-                  <div className="flex items-center">
-                    <ChevronRight
-                      className={`text-blue-600 mr-3 transform transition-transform duration-200 ${isOpen ? "rotate-90" : ""
-                        }`}
-                      size={18}
-                    />
-                    <div className="text-left">
-                      <div className="font-semibold text-gray-800">
-                        {item.label}
-                      </div>
-                    </div>
-                  </div>
-                </button>
+      {/* TOP: Chart + Image */}
+      <div className="max-w-7xl w-full mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
 
-                <div
-                  className={`px-4 overflow-hidden transition-all duration-200 ${isOpen ? "py-4" : "py-0"
-                    }`}
-                  style={{ maxHeight: isOpen ? "400px" : "0px" }}
-                >
-                  <div className="text-gray-700">{item.summary}</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Right side - Radar Chart */}
-        <div className="p-5 flex flex-col items-center">
-          <ResponsiveContainer width="100%" height={350}>
-            <RadarChart
-              data={data}
-              outerRadius={isSmallScreen ? 70 : 120}
-            >
+        {/* Chart (UNCHANGED) */}
+        <div className="w-full h-[420px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart data={data} outerRadius={120}>
               <PolarGrid />
 
               <PolarAngleAxis
                 dataKey="subject"
                 tick={{
-                  fontSize: isSmallScreen ? 10 : 14,
+                  fontSize: 14,
                   fill: "#374151",
                 }}
               />
@@ -174,9 +185,55 @@ export default function CareerInterests({ scores = [], language = "en" }) {
               />
             </RadarChart>
           </ResponsiveContainer>
+        </div>
+
+        {/* Image */}
+        <div className="w-full flex justify-center">
+          <img
+            src={InterestImg}
+            alt="interest"
+            className="w-full max-w-[500px] h-[420px] object-contain"
+          />
+        </div>
+      </div>
+
+      {/* BOTTOM: Cards */}
+      <div className="max-w-7xl w-full mt-10 px-2">
+
+        <h3 className="text-2xl font-semibold text-gray-800 mb-6">
+          {UI_TEXT[language]?.section}
+        </h3>
+
+        <div className="grid sm:grid-cols-2 gap-6">
+
+          {topInterests.map((t) => (
+            <InterestCard key={t.code} trait={t} language={language} />
+          ))}
+
+          {/* Motivation Card */}
+          <div className="bg-transparent rounded-2xl p-6 flex items-center justify-center text-center">
+            <p className="text-xl sm:text-4xl font-bold leading-relaxed">
+
+              <span className="text-gray-900">
+                {language === "mr"
+                  ? "तुमच्या आवडी तुमचा मार्ग ठरवतात"
+                  : "Your interests shape your path"}
+              </span>
+
+              <br />
+
+              <span className="bg-blue-600 text-transparent bg-clip-text">
+                {language === "mr"
+                  ? "त्यांचा पाठपुरावा करा"
+                  : "Follow what excites you"}
+              </span>
+
+            </p>
+          </div>
 
         </div>
       </div>
+
     </div>
   );
 }

@@ -10,6 +10,7 @@ export default function CareerOptions({
   language,
   readOnly = false,
   onSelectCareer = () => { },
+  careerPathPrefix = "/career",
 }) {
 
   console.log(careers)
@@ -160,6 +161,7 @@ export default function CareerOptions({
                       language={language}
                       readOnly={readOnly}
                       onSelectCareer={onSelectCareer}
+                      careerPathPrefix={careerPathPrefix}
                     />
                   ))}
               </div>
@@ -185,6 +187,7 @@ export default function CareerOptions({
                       language={language}
                       readOnly={readOnly}
                       onSelectCareer={onSelectCareer}
+                      careerPathPrefix={careerPathPrefix}
                     />
                   ))}
               </div>
@@ -197,7 +200,7 @@ export default function CareerOptions({
 }
 
 /* ------------------ CARD ------------------ */
-function CareerCard({ career, language, readOnly, onSelectCareer }) {
+function CareerCard({ career, language, readOnly, onSelectCareer, careerPathPrefix }) {
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col justify-between transition">
       <h3 className="text-xl font-semibold text-gray-900 mb-3">
@@ -213,7 +216,7 @@ function CareerCard({ career, language, readOnly, onSelectCareer }) {
           <button
             onClick={() => {
               onSelectCareer(career);
-              window.open(`/career/${career.id}`, "_blank");
+              window.open(`${careerPathPrefix}/${career.id}`, "_blank");
             }}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
           >

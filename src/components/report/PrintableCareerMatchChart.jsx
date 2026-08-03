@@ -24,7 +24,7 @@ export default function PrintableCareerMatchChart({
 
   return (
     <div
-      className="w-full text-gray-800 print-page"
+      className="w-full text-gray-800 print-page print:break-inside-avoid"
       style={{
         display: "flex",
         flexDirection: "column",

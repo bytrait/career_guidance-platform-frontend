@@ -8,6 +8,7 @@ import PrintableCareerDetail from "./PrintableCareerDetail";
 
 import careerFields from "../../data/career_fields.json";
 import { useMemo } from "react";
+import PersonalityStrengths from "./PersonalityStrengths";
 
 
 /** 
@@ -111,6 +112,7 @@ export default function PrintDocument({
         scores={scores}
         language={language}
       />
+        {/* <PersonalityStrengths scores={scores} language={language} /> */}
 
       <PrintableCareerInterests
         scores={scores}

@@ -7,7 +7,7 @@ export default function CounsellorSidebar({ sidebarOpen, setSidebarOpen }) {
     { name: "Overview", path: "/counsellor/dashboard" },
     { name: "Students", path: "/counsellor/students" },
     { name: "Schools", path: "/counsellor/schools" },
-    { name: "Billing", path: "/counsellor/billing" },
+    // { name: "Billing", path: "/counsellor/billing" },
   ];
 
   return (

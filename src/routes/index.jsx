@@ -8,8 +8,9 @@ import PublicLayout from "../layouts/PublicLayout";
 // Student Pages
 import WelcomePage from "../pages/WelcomePage";
 import AssessmentPage from "../pages/AssessmentPage";
-import ReportPage from "../pages/ReportPage";
-import CongratulationsPage from "../pages/CongratulationsPage";
+// import ReportPage from "../pages/ReportPage";
+// import CongratulationsPage from "../pages/CongratulationsPage";
+import ReportReadyPage from "../pages/ReportReadyPage";
 import CareerContent from "../components/CareerContent/CareerContent";
 import CareerPage from "../pages/CareerPage";
 import CareerList from "../pages/CareerList";
@@ -51,8 +52,9 @@ export const router = createBrowserRouter([
     children: [
       { path: "", element: <WelcomePage /> },
       { path: "assessment", element: <AssessmentPage /> },
-      { path: "report", element: <ReportPage /> },
-      { path: "congratulations", element: <CongratulationsPage /> },
+      // { path: "report", element: <ReportPage /> },
+      // { path: "congratulations", element: <CongratulationsPage /> },
+      { path: "report-ready", element: <ReportReadyPage /> },
       { path: "career_content", element: <CareerContent /> },
       { path: "career/:careerId", element: <CareerPage /> },
       { path: "careers", element: <CareerList /> },
@@ -75,6 +77,7 @@ export const router = createBrowserRouter([
 
       { path: "students", element: <CounsellorStudents /> },
       { path: "students/:studentId/report", element: <CounsellorStudentReport /> },
+      { path: "career/:careerId", element: <CareerPage /> },
 
       { path: "schools", element: <CounsellorSchools /> },
       { path: "schools/:schoolId", element: <SchoolStudents /> },

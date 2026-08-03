@@ -1,20 +1,18 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
-  LabelList,
-  Cell,
+  Tooltip,
+  LabelList
 } from "recharts";
-import traitsData from "../../data/personality_traits.json";
 
-import personalityimg from "../../assets/personality.png";
+import traitsData from "../../data/personality_traits_v2.json";
+import PersonalityImg from "../../assets/personality.png";
 
 /* ---------------- CONSTANTS ---------------- */
-
-const ORDER = ["O", "C", "E", "A", "N"];
 
 const TRAIT_JSON_KEY = {
   O: "Openness",
@@ -25,98 +23,154 @@ const TRAIT_JSON_KEY = {
 };
 
 const TRAIT_DISPLAY = {
-  O: {
-    en: "Openness",
-    mr: "मोकळेपणा",
-    color: "#6ea8fe",
-  },
-  C: {
-    en: "Conscientiousness",
-    mr: "जबाबदारी",
-    color: "#63d2a3",
-  },
-  E: {
-    en: "Extroversion",
-    mr: "बहिर्मुखता",
-    color: "#f6c453",
-  },
-  A: {
-    en: "Agreeableness",
-    mr: "सहकार्यशीलता",
-    color: "#f28bb8",
-  },
-  N: {
-    en: "Neuroticism",
-    mr: "भावनिक संवेदनशीलता",
-    color: "#b197fc",
-  },
+  O: { en: "Openness", mr: "मोकळेपणा" },
+  C: { en: "Conscientiousness", mr: "कर्मठपणा" },
+  E: { en: "Extroversion", mr: "बहिर्मुखता" },
+  A: { en: "Agreeableness", mr: "सहमतता" },
+  N: { en: "Neuroticism", mr: "भावनिक अस्थिरता" },
 };
 
 /* ---------------- HELPERS ---------------- */
 
-function getCategory(traitJsonKey, score, lang = "en") {
-  const traitInfo = traitsData?.traits?.[traitJsonKey];
-  if (!traitInfo) return { label: "", summary: "", icon: "" };
+function getCategory(traitJsonKey, score) {
+  let traitInfo = traitsData?.traits?.[traitJsonKey];
 
-  for (const cat of traitInfo.categories) {
-    const [min, max] = cat.range.split("-").map(Number);
-    if (score >= min && score <= max) {
-      return {
-        label: cat.label?.[lang] || cat.label?.en,
-        summary: cat.summary?.[lang] || cat.summary?.en,
-        icon: cat.icon,
-      };
-    }
+  if (!traitInfo) {
+    const alt = {
+      Extroversion: "Extraversion",
+      Extraversion: "Extroversion",
+    };
+    traitInfo = traitsData?.traits?.[alt[traitJsonKey]];
   }
-  return { label: "", summary: "", icon: "" };
+
+  if (!traitInfo) return null;
+
+  return traitInfo.categories.find(
+    (c) => score >= c.level_score.min && score <= c.level_score.max
+  );
 }
 
-/* ---------------- COMPONENT ---------------- */
+/* ---------------- TRAIT CARD (UNCHANGED DESIGN) ---------------- */
 
-export default function PrintablePersonalityA4({
+function TraitCard({ trait, language }) {
+  const c = trait.content;
+  if (!c) return null;
+
+  const renderShort = (list) => list?.slice(0, 2).join(", ");
+
+  return (
+    <div
+      className="bg-white  border border-gray-50 rounded-2xl p-4"
+      style={{ pageBreakInside: "avoid" }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-blue-700 font-semibold text-lg flex items-center">
+          <i className="bi bi-person-lines-fill mr-2"></i>
+          {trait.label}
+        </h3>
+
+        <div className="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-medium">
+          {trait.title}
+        </div>
+      </div>
+
+      <div className="bg-gray-50 rounded-xl p-3 mb-4 border border-gray-100">
+        <p className="text-gray-800 text-sm leading-relaxed font-medium">
+          {c.meaning?.[language]}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+          <p className="text-gray-500 text-xs mb-1">Behavior</p>
+          <p className="text-gray-700 text-xs">
+            {renderShort(c.how_it_shows?.[language])}
+          </p>
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+          <p className="text-gray-500 text-xs mb-1">Learning</p>
+          <p className="text-gray-700 text-xs">
+            {renderShort(c.learning_preference?.[language])}
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-4">
+        <p className="text-xs text-blue-700 mb-1">Strength</p>
+        <p className="text-gray-800 text-xs font-semibold">
+          {renderShort(c.strengths?.[language])}
+        </p>
+      </div>
+
+      <div className="pt-2 border-t border-gray-100">
+        <p className="text-xs text-gray-500 mb-1">Growth</p>
+        <p className="text-xs text-gray-700">
+          {renderShort(c.growth_suggestions?.[language])}
+        </p>
+      </div>
+
+      <div className="pt-2 border-t border-gray-100 mt-2">
+        <p className="text-xs text-gray-500 mb-1">Reflection</p>
+        <p className="text-xs text-gray-700">
+          {c.reflection_prompts?.[language]?.[0]}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- MAIN COMPONENT ---------------- */
+
+export default function PrintablePersonalityStrengthsA4({
   scores = [],
   language = "en",
 }) {
-  if (!scores.length) return null;
+  const [chartData, setChartData] = useState([]);
+  const [traits, setTraits] = useState([]);
 
-  const traits = ORDER.map((code) => {
-    const item = scores.find(
-      (s) => s.assessmentType === "OCEAN" && s.traitOrCategoryCode === code
-    );
+  useEffect(() => {
+    if (!scores.length) return;
 
-    const score = Number(item?.score || 0);
-    const category = getCategory(TRAIT_JSON_KEY[code], score, language);
+    const oceanScores = scores.filter((i) => i.assessmentType === "OCEAN");
+    const ordered = ["O", "C", "E", "A", "N"];
 
-    return {
-      code,
-      score,
-      name: TRAIT_DISPLAY[code][language] || TRAIT_DISPLAY[code].en,
-      color: TRAIT_DISPLAY[code].color,
-      label: category.label,
-      summary: category.summary,
-      icon: category.icon,
-    };
-  });
+    const chart = ordered.map((code) => {
+      const item = oceanScores.find((s) => s.traitOrCategoryCode === code);
+      return {
+        name: TRAIT_DISPLAY[code]?.[language],
+        value: item?.score || 0,
+      };
+    });
 
-  const chartData = traits.map((t) => ({
-    name: t.name,
-    value: t.score,
-    fill: t.color,
-  }));
+    setChartData(chart);
+
+    const list = ordered.map((code) => {
+      const item = oceanScores.find((s) => s.traitOrCategoryCode === code);
+      const score = item?.score || 0;
+
+      const cat = getCategory(TRAIT_JSON_KEY[code], score);
+
+      return {
+        code,
+        title: TRAIT_DISPLAY[code]?.[language],
+        label: cat?.archetype?.[language] || cat?.archetype?.en,
+        content: cat?.content,
+      };
+    });
+
+    setTraits(list);
+  }, [scores, language]);
 
   return (
-    /* ================= A4 PAGE ================= */
     <div
       style={{
         width: "210mm",
-        height: "292mm", // 👈 adjusted to fit footer
-        background: "#ffffff",
-        pageBreakAfter: "always",
-        position: "relative", // 👈 required for footer
+        padding: "10mm",
+        background: "#fff",
       }}
-      className="text-gray-800"
     >
-      {/* ---------- TOP HEADING ---------- */}
+      {/* HEADER (unchanged, just tighter spacing) */}
       <div className="text-center mb-6">
         <div className="flex justify-center items-center gap-3">
           <i className="bi bi-lightbulb text-yellow-400 text-4xl" />
@@ -143,124 +197,78 @@ export default function PrintablePersonalityA4({
             : "Let's explore your personality traits to see what makes you unique and how you like to think and learn."}
         </p>
       </div>
+      {/* MAIN GRID - FORCE 2 COLUMN */}
+      <div className="grid grid-cols-12 gap-4 mt-6">
 
-      {/* ---------- TWO COLUMN SECTION ---------- */}
-      <div className="grid grid-cols-12 gap-2">
-        {/* ===== LEFT : IMAGE + CHART ===== */}
-        <div className="col-span-7" style={{ pageBreakInside: "avoid" }}>
+        {/* IMAGE (smaller column) */}
+        <div className="col-span-4 flex justify-center items-center">
           <img
-            src={personalityimg}
-            alt="Personality"
-            width={420}
-            height={420}
-            className="mx-auto"
+            src={PersonalityImg}
+            alt="growth"
+            className="w-[260px] h-[220px] object-contain"
           />
+        </div>
 
-          <div className="bg-white" style={{ pageBreakInside: "avoid" }}>
-            <BarChart
-              width={460}
-              height={380}
-              data={chartData}
-              margin={{ top: 8, right: 15, left: -10, bottom: 20 }}
-            >
-              <XAxis
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 11, fill: "#475569" }}
-                dy={10}
-              />
+        {/* CHART (bigger column) */}
+        <div className="col-span-8 flex justify-center">
+          <BarChart
+            width={420}   // 👈 increased
+            height={260}  // 👈 increased
+            data={chartData}
+            margin={{ top: 0, right: 20, left: -20, bottom: 10 }}
+          >
+            <CartesianGrid stroke="#e5e7eb" />
+            <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="value" fill="#2563eb" isAnimationActive={false}>
+              <LabelList dataKey="value" position="middle" fill="white" />
+            </Bar>
+          </BarChart>
+        </div>
 
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={false}
-                width={0}
-              />
+      </div>
+      <div className="w-full mt-10 mb-4">
+        <h3 className="text-2xl font-semibold text-gray-800">
+          {language === "mr"
+            ? "तुमचे व्यक्तिमत्त्व तपशील"
+            : "Your Personality Insights"}
+        </h3>
 
-              <Bar dataKey="value" radius={[8, 8, 0, 0]} isAnimationActive={false}>
-                {chartData.map((entry, index) => (
-                  <Cell key={index} fill={entry.fill} />
-                ))}
-                <LabelList
-                  dataKey="value"
-                  position="middle"
-                  fontSize={12}
-                  fill="white"
-                  fontWeight={600}
-                  dy={-4}
-                />
-              </Bar>
-            </BarChart>
+        <p className="text-gray-500 mt-1 text-sm">
+          {language === "mr"
+            ? "तुमच्या गुणधर्मांचे सविस्तर विश्लेषण"
+            : "A deeper understanding of your personality traits"}
+        </p>
+      </div>
+      {/* TRAITS - FORCE 2 COLUMN */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-6">
+        {traits.map((t) => (
+          <TraitCard key={t.code} trait={t} language={language} />
+        ))}
 
-          </div>
+        {/* 6th Card (Motivation) */}
+        <div className="bg-white border border-gray-50 rounded-2xl p-6 flex items-center justify-center text-center h-full">
+          <p className="text-xl sm:text-5xl font-bold leading-relaxed">
 
-          <div style={{ marginTop: 8, textAlign: "center" }}>
-            <h3 className="text-lg font-semibold text-blue-900">
+            <span className="text-gray-900">
               {language === "mr"
-                ? "तुमचे व्यक्तिमत्व गुणधर्म"
-                : "Your Personality Traits"}
-            </h3>
-          </div>
-        </div>
+                ? "तुमच्यातील प्रत्येक गुण"
+                : "Every trait you have"}
+            </span>
 
-        {/* ===== RIGHT : CARDS ===== */}
-        <div className="col-span-5 space-y-2">
-          {traits.map((t) => (
-            <div
-              key={t.code}
-              className="rounded-2xl p-4"
-              style={{
-                pageBreakInside: "avoid",
-                border: `2px solid ${t.color}`,
-              }}
-            >
-              <span className="flex items-center gap-3 mb-2">
-                <i
-                  className={`text-4xl bi ${t.icon}`}
-                  style={{ color: t.color }}
-                />
-                <div className="font-semibold text-lg text-blue-900">
-                  {t.label || t.name}
-                </div>
-              </span>
+            <br />
 
-              <div className="text-sm text-gray-600 leading-relaxed">
-                {t.summary}
-              </div>
-            </div>
-          ))}
+            <span className="text-blue-600  bg-clip-text">
+              {language === "mr"
+                ? "तुमची ताकद आहे"
+                : "is your strength"}
+            </span>
+
+          </p>
         </div>
       </div>
 
-      {/* ---------- FOOTER ---------- */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "-12mm",
-          left: 0,
-          right: 0,
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            width: "100%",
-            height: "1px",
-            backgroundColor: "#d1d5db",
-            margin: "0 auto 6px auto",
-          }}
-        />
-        <div
-          style={{
-            fontSize: "12px",
-            color: "#6b7280",
-            letterSpacing: "1px",
-          }}
-        >
-          1
-        </div>
-      </div>
     </div>
   );
 }

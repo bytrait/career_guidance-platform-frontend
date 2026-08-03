@@ -10,19 +10,18 @@ import {
   ResponsiveContainer,
   LabelList
 } from "recharts";
-import { ChevronRight } from "lucide-react";
-import traitsData from "../../data/personality_traits.json";
+import traitsData from "../../data/personality_traits_v2.json";
 
-// NOTE: This mapping MUST match the keys in personality_traits.json
+import PersonalityImg from "../../assets/personality.png";
+
 const TRAIT_JSON_KEY = {
   O: "Openness",
   C: "Conscientiousness",
-  E: "Extroversion", // match JSON key exactly
+  E: "Extroversion",
   A: "Agreeableness",
   N: "Neuroticism",
 };
 
-// Display names for chart in English + Marathi
 const TRAIT_DISPLAY = {
   O: { en: "Openness", mr: "मोकळेपणा" },
   C: { en: "Conscientiousness", mr: "कर्मठपणा" },
@@ -31,99 +30,162 @@ const TRAIT_DISPLAY = {
   N: { en: "Neuroticism", mr: "भावनिक अस्थिरता" },
 };
 
-// Helper to get category based on score
-function getCategory(traitJsonKey, score, lang = "en") {
+// category logic
+function getCategory(traitJsonKey, score) {
   let traitInfo = traitsData?.traits?.[traitJsonKey];
 
-  // fallback alternate spellings
   if (!traitInfo) {
-    const alternates = {
+    const alt = {
       Extroversion: "Extraversion",
       Extraversion: "Extroversion",
     };
-    const altKey = alternates[traitJsonKey];
-    if (altKey) traitInfo = traitsData?.traits?.[altKey];
+    traitInfo = traitsData?.traits?.[alt[traitJsonKey]];
   }
 
   if (!traitInfo) return null;
 
-  for (const cat of traitInfo.categories) {
-    const [min, max] = String(cat.range).split("-").map(Number);
-    if (!Number.isNaN(min) && !Number.isNaN(max) && score >= min && score <= max) {
-      return {
-        label: (cat.label && (cat.label[lang] || cat.label["en"])) || null,
-        summary: (cat.summary && (cat.summary[lang] || cat.summary["en"])) || null,
-      };
-    }
-  }
-  return null;
+  return traitInfo.categories.find(
+    (c) => score >= c.level_score.min && score <= c.level_score.max
+  );
+}
+
+// text renderer (no bullets)
+function renderTextList(list) {
+  if (!list) return null;
+  return list.join(". ") + ".";
+}
+
+// Trait Card
+function TraitCard({ trait, language }) {
+  const c = trait.content;
+  if (!c) return null;
+
+  const renderShort = (list) => list?.slice(0, 2).join(", ");
+
+  return (
+    <div className="bg-white rounded-2xl p-6">
+
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-blue-700 font-semibold text-xl flex items-center">
+          <i className="bi bi-person-lines-fill mr-2"></i>
+          {trait.label}
+        </h3>
+
+        <div className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-medium">
+          {trait.title}
+        </div>
+      </div>
+
+      {/* MEANING */}
+      <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
+        <p className="text-gray-800 text-base leading-relaxed font-medium">
+          {c.meaning?.[language]}
+        </p>
+      </div>
+
+      {/* QUICK GRID */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+
+        <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+          <p className="text-gray-500 text-sm mb-1 flex items-center">
+            <i className="bi bi-eye mr-1"></i>
+            {language === "mr" ? "वर्तन" : "Behavior"}
+          </p>
+          <p className="text-gray-700 font-medium text-sm leading-snug">
+            {renderShort(c.how_it_shows?.[language])}
+          </p>
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+          <p className="text-gray-500 text-sm mb-1 flex items-center">
+            <i className="bi bi-book mr-1"></i>
+            {language === "mr" ? "शिकणे" : "Learning"}
+          </p>
+          <p className="text-gray-700 font-medium text-sm leading-snug">
+            {renderShort(c.learning_preference?.[language])}
+          </p>
+        </div>
+
+      </div>
+
+      {/* STRENGTH */}
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
+        <p className="text-sm text-blue-700 mb-1 flex items-center font-sm">
+          <i className="bi bi-stars mr-1"></i>
+          {language === "mr" ? "तुमची ताकद" : "Your Strength"}
+        </p>
+        <p className="text-gray-800 text-sm font-semibold leading-snug">
+          {renderShort(c.strengths?.[language])}
+        </p>
+      </div>
+
+      {/* GROWTH */}
+      <div className="pt-3 border-t border-gray-100">
+        <p className="text-sm text-gray-500 mb-1 flex items-center">
+          <i className="bi bi-graph-up mr-1"></i>
+          {language === "mr" ? "सुधारणा" : "Growth"}
+        </p>
+
+        <p className="text-sm text-gray-700 leading-relaxed">
+          {renderShort(c.growth_suggestions?.[language])}
+        </p>
+      </div>
+
+      {/* REFLECTION */}
+      <div className="pt-3 border-t border-gray-100 mt-4">
+        <p className="text-sm text-gray-500 mb-1 flex items-center">
+          <i className="bi bi-question-circle mr-1"></i>
+          {language === "mr" ? "विचार करा" : "Reflection"}
+        </p>
+
+        <p className="text-sm text-gray-700 leading-relaxed">
+          {c.reflection_prompts?.[language]?.[0]}
+        </p>
+      </div>
+
+    </div>
+  );
 }
 
 export default function PersonalityStrengths({ scores = [], language = "en" }) {
   const [chartData, setChartData] = useState([]);
-  const [accordions, setAccordions] = useState({});
-  const [openTrait, setOpenTrait] = useState(null);
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [traits, setTraits] = useState([]);
 
   useEffect(() => {
-    const checkScreen = () => setIsSmallScreen(window.innerWidth < 640); // tailwind 'sm'
-    checkScreen();
-    window.addEventListener("resize", checkScreen);
-    return () => window.removeEventListener("resize", checkScreen);
-  }, []);
+    if (!scores.length) return;
 
+    const oceanScores = scores.filter((i) => i.assessmentType === "OCEAN");
+    const ordered = ["O", "C", "E", "A", "N"];
 
-  useEffect(() => {
-    if (!scores || scores.length === 0) return;
+    // chart (UNCHANGED)
+    const chart = ordered.map((code) => {
+      const item = oceanScores.find((s) => s.traitOrCategoryCode === code);
+      return {
+        name: TRAIT_DISPLAY[code]?.[language],
+        value: item?.score || 0,
+      };
+    });
 
-    const oceanScores = scores.filter((item) => item.assessmentType === "OCEAN");
-
-    // Build chart data
-    const orderedCodes = ["O", "C", "E", "A", "N"];
-    const chart = orderedCodes
-      .map((code) => {
-        const item = oceanScores.find((s) => s.traitOrCategoryCode === code);
-        if (item) {
-          return {
-            name: TRAIT_DISPLAY[code]?.[language] || TRAIT_JSON_KEY[code] || item.traitOrCategoryCode,
-            value: item.score,
-          };
-        }
-        return null;
-      })
-      .filter(Boolean);
     setChartData(chart);
 
-    // Build accordions
-    const acc = {};
-    oceanScores.forEach((item) => {
-      const jsonKey = TRAIT_JSON_KEY[item.traitOrCategoryCode];
-      const cat = getCategory(jsonKey, item.score, language);
-      if (cat) {
-        const displayName =
-          TRAIT_DISPLAY[item.traitOrCategoryCode]?.[language] || jsonKey;
-        acc[displayName] = {
-          label: cat.label,
-          summary: cat.summary,
-          score: item.score,
-        };
-      }
+    // traits
+    const list = ordered.map((code) => {
+      const item = oceanScores.find((s) => s.traitOrCategoryCode === code);
+      const score = item?.score || 0;
+
+      const cat = getCategory(TRAIT_JSON_KEY[code], score);
+
+      return {
+        code,
+        title: TRAIT_DISPLAY[code]?.[language],
+        label: cat?.archetype?.[language] || cat?.archetype?.en,
+        content: cat?.content,
+      };
     });
-    setAccordions(acc);
 
-    // auto-open first accordion
-    // Always open Openness first (O)
-    const firstDisplayName =
-      TRAIT_DISPLAY["O"]?.[language] || TRAIT_JSON_KEY["O"];
-
-    setOpenTrait(firstDisplayName);
-
-
+    setTraits(list);
   }, [scores, language]);
-
-  const toggleAccordion = (trait) => {
-    setOpenTrait((prev) => (prev === trait ? null : trait));
-  };
 
   return (
     <div className="w-full flex flex-col items-center">
@@ -145,101 +207,87 @@ export default function PersonalityStrengths({ scores = [], language = "en" }) {
         </div>
       </div>
 
-      {/* Content Section */}
-      <div className="max-w-7xl w-full mt-8 grid grid-cols-1 lg:grid-cols-2 lg:gap-8">
+      <div className="w-full max-w-7xl mx-auto px-4">
 
-        {/* LEFT PANEL (scrollable, equal height) */}
-        <div className="lg:h-[420px] space-y-4">
+        <div className="grid lg:grid-cols-2 gap-8 items-center">
 
-          {["O", "C", "E", "A", "N"]
-            .map((code) => {
-              const traitName =
-                TRAIT_DISPLAY[code]?.[language] || TRAIT_JSON_KEY[code];
+          {/* Image */}
+          <div className="w-full flex justify-center">
+            <img
+              src={PersonalityImg}
+              alt="growth"
+              className="w-full max-w-[500px] h-[420px] object-contain"
+            />
+          </div>
 
-              const info = accordions[traitName];
-              if (!info) return null;
-
-              return [traitName, info];
-            })
-            .filter(Boolean)
-            .map(([trait, info]) => {
-              const isOpen = openTrait === trait;
-
-              return (
-                <div
-                  key={trait}
-                  className="bg-white rounded-xl overflow-hidden border border-gray-300"
-                >
-                  <button
-                    type="button"
-                    className="w-full flex items-center justify-between px-4 py-4 cursor-pointer"
-                    onClick={() => toggleAccordion(trait)}
-                  >
-                    <div className="flex items-center">
-                      <ChevronRight
-                        className={`text-blue-600 mr-3 transform transition-transform duration-200 ${isOpen ? "rotate-90" : ""
-                          }`}
-                        size={18}
-                      />
-                      <div className="font-semibold text-gray-800">{info.label}</div>
-                    </div>
-                  </button>
-
-                  <div
-                    className={`px-4 overflow-hidden transition-all duration-300 ${isOpen ? "py-4" : "py-0"
-                      }`}
-                    style={{ maxHeight: isOpen ? "300px" : "0px" }}
-                  >
-                    <div className="text-gray-700">{info.summary}</div>
-                  </div>
-                </div>
-              );
-            })}
-        </div>
-
-
-        {/* RIGHT PANEL */}
-        <div
-          className="w-full px-2 mt-6 lg:mt-0 lg:p-4">
-          <div
-            className="w-full h-64 lg:h-[420px]">
+          {/* Chart (UNCHANGED DESIGN, just height aligned) */}
+          <div className="w-full h-[420px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
-                margin={{ top: 0, right: 30, left: -35, bottom: 10 }}
+                margin={{ top: 0, right: 40, left: -40, bottom: 10 }}
               >
                 <CartesianGrid stroke="#e5e7eb" />
                 <XAxis
                   dataKey="name"
                   interval={0}
+                  height={60}
                   tick={{
-                    fontSize: isSmallScreen ? 10 : 12,
+                    fontSize: 12,
                     fill: "#4b5563",
                   }}
-                  angle={isSmallScreen ? 30 : 0}
-                  textAnchor={isSmallScreen ? "top" : "middle"}
-                  height={isSmallScreen ? 45 : 30}
                 />
-
-                <YAxis tick={{ fontSize: 12, fill: "#4b5563" }} />
+                <YAxis />
                 <Tooltip cursor={{ fill: "transparent" }} />
                 <Bar dataKey="value" fill="#2563eb" radius={[6, 6, 0, 0]}>
-                  <LabelList
-                    dataKey="value"
-                    position="middle"
-                    fill="white"
-                    style={{ fontWeight: 500 }}
-                  />
+                  <LabelList dataKey="value" position="middle" fill="white" />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
+
         </div>
+        <div className="max-w-7xl w-full mt-10 mb-4 px-2">
+          <h3 className="text-2xl font-semibold text-gray-800">
+            {language === "mr"
+              ? "तुमचे व्यक्तिमत्त्व तपशील"
+              : "Your Personality Insights"}
+          </h3>
 
+          <p className="text-gray-500 mt-1 text-sm">
+            {language === "mr"
+              ? "तुमच्या गुणधर्मांचे सविस्तर विश्लेषण"
+              : "A deeper understanding of your personality traits"}
+          </p>
+        </div>
+        {/* Traits */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-6">
+          {traits.map((t) => (
+            <TraitCard key={t.code} trait={t} language={language} />
+          ))}
 
+          {/* 6th Card (Motivation) */}
+          <div className="bg-transparent rounded-2xl p-6 flex items-center justify-center text-center h-full">
+            <p className="text-xl sm:text-5xl font-bold leading-relaxed">
 
+              <span className="text-gray-900">
+                {language === "mr"
+                  ? "तुमच्यातील प्रत्येक गुण"
+                  : "Every trait you have"}
+              </span>
+
+              <br />
+
+              <span className="bg-blue-600 text-transparent bg-clip-text">
+                {language === "mr"
+                  ? "तुमची ताकद आहे"
+                  : "is your strength"}
+              </span>
+
+            </p>
+          </div>
+        </div>
       </div>
-
     </div>
   );
 }

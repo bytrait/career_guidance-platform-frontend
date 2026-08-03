@@ -1,7 +1,7 @@
 // src/pages/CareerPage.jsx
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 
 import {
   setSelectedCareer
@@ -13,7 +13,10 @@ import StageContentView from "../components/career/StageContentView";
 
 export default function CareerPage() {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { careerId } = useParams(); // URL param: /career/:careerId
+  const isCounsellorView = location.pathname.startsWith("/counsellor");
+  const backHref = isCounsellorView ? "/counsellor/students" : "/report-ready";
 
   const { selectedCareer, recommendedCareers, language } = useSelector(
     (s) => s.report
@@ -39,13 +42,13 @@ useEffect(() => {
     if (!careerId) return;
 
     // CASE 1: Already selected (normal navigation)
-    if (selectedCareer && selectedCareer.id === careerId) {
+    if (selectedCareer && String(selectedCareer.id) === String(careerId)) {
       setLoading(false);
       return;
     }
 
     // CASE 2: Try to find in Redux list
-    const found = recommendedCareers.find((c) => c.id === careerId);
+    const found = recommendedCareers.find((c) => String(c.id) === String(careerId));
     if (found) {
       dispatch(setSelectedCareer(found));
       setLoading(false);
@@ -75,7 +78,7 @@ useEffect(() => {
       <div className="min-h-screen flex flex-col items-center justify-center text-gray-500">
         <div className="text-lg">No career selected or career not found.</div>
         <a
-          href="/report"
+          href={backHref}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
         >
           Go back

@@ -1,19 +1,19 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
+  Tooltip,
   LabelList,
 } from "recharts";
 
-import aptitudeTraits from "../../data/aptitude_traits.json";
-import aptitudeImg from "../../assets/aptitude.png";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import aptitudeTraits from "../../data/aptitude_traits_v2.json";
+import AptitudeImg from "../../assets/aptitude.png";
 
-/* ------------------ CONSTANTS ------------------ */
-
-const ORDER = ["NA", "MR", "LA", "LR", "SA"];
+/* ---------------- CONSTANTS ---------------- */
 
 const APT_CODES = {
   NA: "Numerical Ability",
@@ -23,80 +23,150 @@ const APT_CODES = {
   SA: "Spatial Ability",
 };
 
-const APT_META = {
-  NA: { en: "Numbers", mr: "संख्या", icon: "bi-calculator" },
-  MR: { en: "Machines", mr: "यंत्र", icon: "bi-gear-fill" },
-  LA: { en: "Language", mr: "भाषा", icon: "bi-chat-dots-fill" },
-  LR: { en: "Logic", mr: "तर्क", icon: "bi-lightbulb-fill" },
-  SA: { en: "Spatial", mr: "अवकाशीय", icon: "bi-bounding-box" },
+const APT_DISPLAY = {
+  NA: { en: "Numerical Ability", mr: "सांख्यिक क्षमता" },
+  MR: { en: "Mechanical Reasoning", mr: "यांत्रिक तर्क" },
+  LA: { en: "Language Ability", mr: "भाषिक क्षमता" },
+  LR: { en: "Logical Reasoning", mr: "तार्किक तर्क" },
+  SA: { en: "Spatial Ability", mr: "स्थानिक क्षमता" },
 };
 
-const BRAND_BLUE = "#2563eb";
+/* ---------------- HELPERS ---------------- */
 
-/* ------------------ HELPERS ------------------ */
+function getCategory(code, score) {
+  const fullName = APT_CODES[code];
+  const info = aptitudeTraits?.aptitudes?.[fullName];
+  if (!info) return null;
 
-function getSummary(code, score, lang) {
-  const trait = aptitudeTraits?.aptitudes?.[APT_CODES[code]];
-  if (!trait) return "";
-
-  const category = trait.categories.find((c) => {
+  return info.categories.find((c) => {
     const [min, max] = c.range.split("-").map(Number);
     return score >= min && score <= max;
   });
-
-  return category?.summary?.[lang] || category?.summary?.en || "";
 }
 
-/* ------------------ COMPONENT ------------------ */
+/* ---------------- CARD (UNCHANGED) ---------------- */
 
-export default function PrintableAptitudeStrengths({
+function AptitudeCard({ trait, language }) {
+  const c = trait.content;
+  if (!c) return null;
+
+  const short = (list) => list?.slice(0, 2).join(", ");
+
+  return (
+    <div
+      className="bg-white border border-gray-50 rounded-2xl p-5"
+      style={{ pageBreakInside: "avoid" }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-blue-700 font-semibold text-lg flex items-center">
+          <i className="bi bi-bar-chart-line mr-2"></i>
+          {trait.title}
+        </h3>
+
+        <div className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-medium">
+          {trait.level}
+        </div>
+      </div>
+
+      <div className="bg-gray-50 rounded-xl p-3 mb-4 border border-gray-100">
+        <p className="text-gray-800 text-sm leading-relaxed font-medium">
+          {c.meaning?.[language]}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+          <p className="text-gray-500 text-xs mb-1">Behavior</p>
+          <p className="text-gray-700 text-xs">
+            {short(c.how_it_shows?.[language])}
+          </p>
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+          <p className="text-gray-500 text-xs mb-1">Strength</p>
+          <p className="text-gray-700 text-xs">
+            {short(c.strengths?.[language])}
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-3">
+        <p className="text-xs text-blue-700 mb-1">Growth</p>
+        <p className="text-gray-800 text-xs">
+          {short(c.growth_suggestions?.[language])}
+        </p>
+      </div>
+
+      <div className="pt-2 border-t border-gray-100">
+        <p className="text-xs text-gray-500 mb-1">Reflection</p>
+        <p className="text-xs text-gray-700">
+          {c.reflection_prompts?.[language]?.[0]}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- MAIN ---------------- */
+
+export default function PrintableAptitudeStrengthsA4({
   scores = [],
   language = "en",
 }) {
-  const { chartData, strongest, others } = useMemo(() => {
+  const [chartData, setChartData] = useState([]);
+  const [traits, setTraits] = useState([]);
+
+  useEffect(() => {
+    if (!scores.length) return;
+
     const aptitudeScores = scores.filter(
       (s) => s.assessmentType === "APTITUDE"
     );
 
-    const items = ORDER.map((code) => {
-      const found = aptitudeScores.find(
-        (s) => s.traitOrCategoryCode === code
+    const ordered = ["NA", "MR", "LA", "LR", "SA"];
+
+    const chart = ordered.map((code) => {
+      const item = aptitudeScores.find(
+        (i) => i.traitOrCategoryCode === code
       );
-      const score = found?.score || 0;
 
       return {
-        code,
-        title: APT_META[code][language],
-        icon: APT_META[code].icon,
-        score,
-        summary: getSummary(code, score, language),
+        name: APT_DISPLAY[code][language],
+        score: item?.score || 0,
       };
     });
 
-    const sorted = [...items].sort((a, b) => b.score - a.score);
+    setChartData(chart);
 
-    return {
-      chartData: items.map((i) => ({
-        name: i.title,
-        value: i.score,
-      })),
-      strongest: sorted[0],
-      others: sorted.slice(1),
-    };
+    const list = ordered.map((code) => {
+      const item = aptitudeScores.find(
+        (i) => i.traitOrCategoryCode === code
+      );
+
+      const score = item?.score || 0;
+      const cat = getCategory(code, score);
+
+      return {
+        code,
+        title: APT_DISPLAY[code][language],
+        level: cat?.label?.[language] || cat?.label?.en,
+        content: cat?.content,
+      };
+    });
+
+    setTraits(list);
   }, [scores, language]);
 
   return (
     <div
       style={{
         width: "210mm",
-        height: "292mm", // reserve footer space
-        background: "#ffffff",
-        pageBreakAfter: "always",
-        position: "relative", // required for footer
+        padding: "10mm",
+        background: "#fff",
       }}
-      className="text-gray-800"
+      className="print:break-inside-avoid"
     >
-      {/* ================= HEADER ================= */}
+      {/* HEADER */}
       <div className="text-center mb-8">
         <div className="flex justify-center items-center gap-3">
           <i className="bi bi-graph-up-arrow text-4xl text-blue-600" />
@@ -122,135 +192,54 @@ export default function PrintableAptitudeStrengths({
         </p>
       </div>
 
-      {/* ================= TWO COLUMN LAYOUT ================= */}
-      <div className="grid grid-cols-12 gap-6 items-start">
-        {/* -------- LEFT : CHART + IMAGE -------- */}
-        <div className="col-span-7">
-          {/* Image */}
-          <div className="flex justify-center mt-4">
-            <img
-              src={aptitudeImg}
-              alt="Aptitude Illustration"
-              width={360}
-              height={360}
-            />
-          </div>
-          {/* Bar Chart */}
-          <div className="bg-white rounded-2xl px-4 py-5">
-            <BarChart
-              width={460}
-              height={460}
-              data={chartData}
-              margin={{ top: 20, right: 15, left: -10, bottom: 20 }}
-            >
+      {/* TOP SECTION */}
+      <div className="grid grid-cols-12 gap-4 items-center">
 
-
-              <XAxis
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 12, fill: "#475569" }}
-                dy={10}
-              />
-
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={false}
-                width={0}
-              />
-
-              <Bar
-                dataKey="value"
-                // barSize={24}
-                radius={[8, 8, 0, 0]}
-                fill={BRAND_BLUE}
-                isAnimationActive={false}
-              >
-                <LabelList
-                  dataKey="value"
-                  position="middle"
-                  fontSize={12}
-                  fill="white"
-                  fontWeight={600}
-                  dy={-4}
-                />
-              </Bar>
-            </BarChart>
-          </div>
-          <div
-            style={{
-              textAlign: "center",
-              pageBreakInside: "avoid",
-            }}
+        {/* CHART BIG */}
+        <div className="col-span-8 flex justify-center">
+          <BarChart
+            width={440}
+            height={300}
+            data={chartData}
           >
-            <h3 className="text-lg font-semibold text-blue-900">
-              {language === "mr"
-                ? "शिकण्याच्या क्षमतांचा प्रोफाइल"
-                : "Learning Ability Profile"}
-            </h3>
-          </div>
-
+            <CartesianGrid stroke="#e5e7eb" />
+            <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+            <YAxis domain={[0, 10]} />
+            <Tooltip />
+            <Bar dataKey="score" fill="#2563eb" isAnimationActive={false}>
+              <LabelList dataKey="score" position="middle" fill="white" />
+            </Bar>
+          </BarChart>
         </div>
 
-        {/* -------- RIGHT : SIMPLE INFO CARDS -------- */}
-        <div className="col-span-5 space-y-3">
-          {[strongest, ...others].map((item) => (
-            <div
-              key={item.code}
-              className="items-start rounded-2xl px-5 py-4 bg-white"
-              style={{
-                border: "2px solid #cbd5e1",
-                pageBreakInside: "avoid",
-              }}
-            >
-              <div className="flex items-center gap-4 mb-2">
-                <div className="text-3xl text-blue-600">
-                  <i className={`bi ${item.icon}`} />
-                </div>
-
-                <h3 className="text-lg font-semibold text-blue-900 mb-1">
-                  {item.title}
-                </h3>
-              </div>
-              <p className="text-sm text-gray-700 leading-snug">
-                {item.summary}
-              </p>
-            </div>
-          ))}
+        {/* IMAGE */}
+        <div className="col-span-4 flex justify-center">
+          <img
+            src={AptitudeImg}
+            alt="aptitude"
+            className="w-[240px] h-[220px] object-contain"
+          />
         </div>
 
       </div>
 
-      {/* ---------- FOOTER ---------- */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "-12mm",
-          left: 0,
-          right: 0,
-          textAlign: "center",
-        }}
-      >
-        {/* horizontal line */}
-        <div
-          style={{
-            width: "100%",
-            height: "1px",
-            backgroundColor: "#d1d5db",
-            margin: "0 auto 6px auto",
-          }}
-        />
+      {/* CARDS */}
+      <div className="grid grid-cols-2 gap-4 mt-6">
+        {traits.map((t) => (
+          <AptitudeCard key={t.code} trait={t} language={language} />
+        ))}
 
-        {/* page number */}
-        <div
-          style={{
-            fontSize: "12px",
-            color: "#6b7280",
-            letterSpacing: "1px",
-          }}
-        >
-          3
+        {/* MOTIVATION */}
+        <div className="bg-white border border-gray-50 rounded-2xl p-5 flex items-center justify-center text-center">
+          <p className="text-5xl font-bold">
+            <span className="text-gray-900">
+              Your abilities are your strength
+            </span>
+            <br />
+            <span className="text-blue-600 bg-clip-text">
+              Keep improving them
+            </span>
+          </p>
         </div>
       </div>
 

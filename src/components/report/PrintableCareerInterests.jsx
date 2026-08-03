@@ -4,126 +4,139 @@ import {
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
-  LabelList
+  Tooltip,
 } from "recharts";
 
-import riasecData from "../../data/riasec_interests.json";
-import interestImg from "../../assets/interest.png";
+import riasecData from "../../data/riasec_interests_v2.json";
+import InterestImg from "../../assets/interest.png";
 
-/* ------------------ TEXT ------------------ */
+/* ---------------- UI ---------------- */
 
 const UI_TEXT = {
   en: {
     heading: "Your Career Interests",
-    description:
-      "These interests show the type of activities and careers you may enjoy.",
+    description: "These are your top interest areas based on your responses.",
+    section: "Your Top Interests",
   },
   mr: {
     heading: "तुमच्या करिअर आवडी",
-    description:
-      "या आवडी तुम्हाला कोणत्या प्रकारच्या कामांमध्ये रस आहे हे दाखवतात.",
+    description: "तुमच्या प्रतिसादांवर आधारित तुमच्या मुख्य आवडी खाली दिल्या आहेत.",
+    section: "तुमच्या प्रमुख आवडी",
   },
 };
 
-/* ------------------ ICON MAP ------------------ */
+/* ---------------- CARD (UNCHANGED DESIGN) ---------------- */
 
-const RIASEC_ICONS = {
-  R: "bi-tools",
-  I: "bi-search",
-  A: "bi-palette",
-  S: "bi-people",
-  E: "bi-megaphone",
-  C: "bi-clipboard-check",
-};
+function InterestCard({ trait, language }) {
+  const c = trait.content;
+  if (!c) return null;
 
-/* ------------------ HELPERS ------------------ */
+  const renderShort = (list) => list?.slice(0, 2).join(", ");
 
-function getTraitInfo(code, lang = "en") {
-  const trait = riasecData.riasec.find((t) => t.code === code);
-  if (!trait) return null;
+  return (
+    <div
+      className="bg-white border border-gray-50 rounded-2xl p-5"
+      style={{ pageBreakInside: "avoid" }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-blue-700 font-semibold text-lg flex items-center">
+          <i className="bi bi-compass mr-2"></i>
+          {trait.name?.[language] || trait.name?.en}
+        </h3>
 
-  return {
-    name: trait.name?.[lang] || trait.name?.en || code,
-    summary: trait.summary?.[lang] || trait.summary?.en || "",
-  };
+        <div className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-medium">
+          {trait.code}
+        </div>
+      </div>
+
+      <div className="bg-gray-50 rounded-xl p-3 mb-4 border border-gray-100">
+        <p className="text-gray-800 text-sm leading-relaxed font-medium">
+          {c.meaning?.[language]}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+          <p className="text-gray-500 text-xs mb-1">Behavior</p>
+          <p className="text-gray-700 text-xs">
+            {renderShort(c.how_it_shows?.[language])}
+          </p>
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+          <p className="text-gray-500 text-xs mb-1">Learning</p>
+          <p className="text-gray-700 text-xs">
+            {renderShort(c.learning_preference?.[language])}
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-3">
+        <p className="text-xs text-blue-700 mb-1">Strength</p>
+        <p className="text-gray-800 text-xs font-semibold">
+          {renderShort(c.strengths?.[language])}
+        </p>
+      </div>
+
+      <div className="pt-2 border-t border-gray-100">
+        <p className="text-xs text-gray-500 mb-1">Reflection</p>
+        <p className="text-xs text-gray-700">
+          {c.reflection_prompts?.[language]?.[0]}
+        </p>
+      </div>
+    </div>
+  );
 }
 
-/* ------------------ COMPONENT ------------------ */
+/* ---------------- MAIN ---------------- */
 
-export default function PrintableCareerInterests({
+export default function PrintableCareerInterestsA4({
   scores = [],
   language = "en",
 }) {
-  const [chartData, setChartData] = useState([]);
-  const [top3, setTop3] = useState([]);
+  const [data, setData] = useState([]);
+  const [topInterests, setTopInterests] = useState([]);
 
   useEffect(() => {
-    if (!scores.length) return;
+    if (!scores?.length) return;
 
     const riasecScores = scores.filter(
-      (s) => s.assessmentType === "RIASEC"
+      (item) => item.assessmentType === "RIASEC"
     );
 
-    const data = riasecData.riasec.map((trait) => {
-      const found = riasecScores.find(
+    const chartData = riasecData.riasec.map((trait) => {
+      const item = riasecScores.find(
         (s) => s.traitOrCategoryCode === trait.code
       );
       return {
         subject: trait.name?.[language] || trait.name?.en,
-        value: found ? found.score : 0,
-        code: trait.code,
+        value: item ? item.score : 0,
       };
     });
 
-    setChartData(data);
+    setData(chartData);
 
-    const sortedTop3 = [...riasecScores]
+    const top3 = [...riasecScores]
       .sort((a, b) => b.score - a.score)
       .slice(0, 3)
-      .map((item) => {
-        const info = getTraitInfo(item.traitOrCategoryCode, language);
-        return {
-          code: item.traitOrCategoryCode,
-          label: info?.name,
-          summary: info?.summary,
-        };
-      });
+      .map((item) =>
+        riasecData.riasec.find((t) => t.code === item.traitOrCategoryCode)
+      );
 
-    setTop3(sortedTop3);
+    setTopInterests(top3);
   }, [scores, language]);
-
-  const renderRadarValue = ({ x, y, value, cx, cy }) => {
-    const dx = cx - x;
-    const dy = cy - y;
-
-    return (
-      <text
-        x={x + dx * 0.12}   // 👈 pulls label toward center
-        y={y + dy * 0.12}
-        fontSize={12}
-        fontWeight={400}
-        textAnchor="middle"
-        dominantBaseline="middle"
-      >
-        {value}
-      </text>
-    );
-  };
-
 
   return (
     <div
       style={{
         width: "210mm",
-        height: "292mm",
-        background: "#ffffff",
-        pageBreakAfter: "always",
-        position: "relative",
+        padding: "10mm",
+        background: "#fff",
       }}
-      className="py-10 text-gray-800"
+      className="mt-8"
     >
-      {/* ================= HEADER ================= */}
-      <div className="text-center mb-10">
+      {/* HEADER */}
+       <div className="text-center mb-10">
         {/* Icon + Title */}
         <div className="flex justify-center items-center gap-4 mb-2">
           <i className="bi bi-compass text-4xl text-blue-600" />
@@ -146,155 +159,69 @@ export default function PrintableCareerInterests({
         </div>
       </div>
 
+      {/* TOP SECTION (FORCED 2 COLUMN) */}
+      <div className="grid grid-cols-12 gap-4 items-center">
 
-
-      {/* ================= TWO COLUMN LAYOUT ================= */}
-      <div className="grid grid-cols-12 gap-2 items-center">
-
-        {/* ===== ROW 1 ===== */}
-        {/* IMAGE | CONTENT */}
-        <div className="col-span-7 flex justify-center items-center">
-          <img
-            src={interestImg}
-            alt="Career Interests Illustration"
-            width={360}
-            height={360}
-          />
-        </div>
-
-        <div className="col-span-5">
-          <div
-          >
-            <p className="text-xl text-gray-600"
-            >
-              {language === "mr"
-                ? "हा विभाग तुम्हाला नैसर्गिकरित्या आवडणाऱ्या क्रिया आणि करिअर क्षेत्रांवर प्रकाश टाकतो. तुमच्या मूल्यांकनाच्या निकालांवर आधारित टॉप 3 आवडी निवडल्या आहेत, ज्या क्षेत्रांमध्ये तुम्ही अधिक आत्मविश्वासाने आणि उत्साहाने पुढे जाऊ शकता हे दाखवतात."
-                : "This section highlights the activities and career areas you naturally enjoy. Your Top 3 interests are selected based on your assessment results and show where you are most likely to feel confident and motivated."}
-            </p>
-          </div>
-        </div>
-
-        {/* ===== ROW 2 ===== */}
-        {/* RADAR | TOP 3 CARDS */}
-        <div className="col-span-7 flex flex-col items-center">
-          {/* RADAR CHART */}
+        {/* CHART BIG */}
+        <div className="col-span-8 flex justify-center">
           <RadarChart
-            width={400}
-            height={400}
-            cx={200}
-            cy={200}
-            outerRadius={130}
-            data={chartData}
+            width={420}
+            height={320}
+            outerRadius={110}
+            data={data}
           >
-            <PolarGrid stroke="#cbd5e1" />
-
+            <PolarGrid />
             <PolarAngleAxis
               dataKey="subject"
-              tick={{ fontSize: 13, fill: "#374151" }}
-              tickMargin={18}
+              tick={{ fontSize: 11 }}
             />
-
+            <Tooltip />
             <Radar
               dataKey="value"
               stroke="#2563eb"
-              fill="#3b82f6"
-              fillOpacity={0.4}
+              fill="#2563eb"
+              fillOpacity={0.6}
               isAnimationActive={false}
-            >
-              <LabelList content={renderRadarValue} />
-
-
-            </Radar>
+            />
           </RadarChart>
-
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">
-            {language === "mr"
-              ? "तुमचे करिअर इंटरेस्ट प्रोफाइल"
-              : "Your Career Interest Profile"}
-          </h3>
         </div>
 
-        <div className="col-span-5 space-y-4">
-          {top3.map((item) => (
-            <div
-              key={item.code}
-              style={{
-                border: "2px solid #cbd5e1",
-                borderRadius: 18,
-                padding: 20,
-                backgroundColor: "#ffffff",
-                pageBreakInside: "avoid",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  marginBottom: 8,
-                }}
-              >
-                <i
-                  className={`bi ${RIASEC_ICONS[item.code]}`}
-                  style={{ fontSize: 28, color: "#2563eb" }}
-                />
-                <div
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 600,
-                    color: "#1e3a8a",
-                  }}
-                >
-                  {item.label}
-                </div>
-              </div>
+        {/* IMAGE SMALL */}
+        <div className="col-span-4 flex justify-center">
+          <img
+            src={InterestImg}
+            alt="interest"
+            className="w-[240px] h-[220px] object-contain"
+          />
+        </div>
 
-              <div
-                style={{
-                  fontSize: 14,
-                  lineHeight: 1.6,
-                  color: "#374151",
-                }}
-              >
-                {item.summary}
-              </div>
-            </div>
+      </div>
+
+      {/* CARDS */}
+      <div className="mt-6">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">
+          {UI_TEXT[language]?.section}
+        </h3>
+
+        <div className="grid grid-cols-2 gap-4">
+          {topInterests.map((t) => (
+            <InterestCard key={t.code} trait={t} language={language} />
           ))}
+
+          {/* Motivation (UNCHANGED) */}
+          <div className="bg-white border border-gray-50 rounded-2xl p-5 flex items-center justify-center text-center">
+            <p className="text-5xl font-bold leading-relaxed">
+              <span className="text-gray-900">
+                Your interests shape your path
+              </span>
+              <br />
+              <span className="text-blue-600 bg-clip-text">
+                Follow what excites you
+              </span>
+            </p>
+          </div>
         </div>
       </div>
-      {/* ---------- FOOTER ---------- */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "-12mm",
-          left: 0,
-          right: 0,
-          textAlign: "center",
-        }}
-      >
-        {/* horizontal line */}
-        <div
-          style={{
-            width: "100%",
-            height: "1px",
-            backgroundColor: "#d1d5db",
-            margin: "0 auto 6px auto",
-          }}
-        />
-
-        {/* page number */}
-        <div
-          style={{
-            fontSize: "12px",
-            color: "#6b7280",
-            letterSpacing: "1px",
-          }}
-        >
-          2
-        </div>
-      </div>
-
-
     </div>
   );
 }
