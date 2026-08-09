@@ -173,18 +173,45 @@ export default function PrintableCareerOptions({
       .sort((a, b) => b.value - a.value);
   }, [scores, careers, language]);
 
-  /* -------- CAREER CARD (UNCHANGED) -------- */
+  /* -------- CAREER CARD -------- */
+  const getCategoryLabel = (career) => {
+    const field = careerFields.find(
+      (f) => f.category_id === career.category_id
+    );
+
+    if (field?.careerField) {
+      return language === "mr"
+        ? field.careerField.mr
+        : field.careerField.en;
+    }
+
+    return (
+      career.category?.value ||
+      career.category?.[language] ||
+      career.category_name ||
+      null
+    );
+  };
+
   const CareerCard = ({ career }) => {
     const idealAptitude = career.aptitude || {};
+    const categoryLabel = getCategoryLabel(career);
 
     return (
       <div className="rounded-3xl bg-white border border-blue-100 p-6 print:break-inside-avoid">
         {/* Header */}
         <div className="flex items-start gap-3">
-          <i className="bi bi-briefcase-fill text-blue-600 text-lg" />
-          <h4 className="text-lg font-semibold text-gray-900">
-            {career.title?.value}
-          </h4>
+          <i className="bi bi-briefcase-fill text-blue-600 text-lg mt-1" />
+          <div className="min-w-0 flex-1">
+            {categoryLabel && (
+              <span className="inline-flex items-center max-w-full mb-1.5 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[11px] font-medium tracking-wide uppercase">
+                <span className="truncate">{categoryLabel}</span>
+              </span>
+            )}
+            <h4 className="text-lg font-semibold text-gray-900 leading-snug">
+              {career.title?.value}
+            </h4>
+          </div>
         </div>
 
         <p className="text-sm text-gray-600 mt-1">

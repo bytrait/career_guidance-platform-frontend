@@ -200,31 +200,60 @@ export default function CareerOptions({
 }
 
 /* ------------------ CARD ------------------ */
-function CareerCard({ career, language, readOnly, onSelectCareer, careerPathPrefix }) {
+function getCategoryLabel(career, language) {
+  const field = careerFields.find(
+    (f) => f.category_id === career.category_id
+  );
+
+  if (field?.careerField) {
+    return language === "mr"
+      ? field.careerField.mr
+      : field.careerField.en;
+  }
+
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col justify-between transition">
-      <h3 className="text-xl font-semibold text-gray-900 mb-3">
-        {career.title?.value}
-      </h3>
+    career.category?.value ||
+    career.category?.[language] ||
+    career.category_name ||
+    null
+  );
+}
 
-      <p className="text-gray-600 text-sm mb-5 line-clamp-3">
-        {career.description?.value}
-      </p>
+function CareerCard({ career, language, readOnly, onSelectCareer, careerPathPrefix }) {
+  const categoryLabel = getCategoryLabel(career, language);
 
-      <div className="flex items-center justify-between mt-auto">
+  return (
+    <div className="group bg-white border border-gray-200 rounded-xl p-6 flex flex-col justify-between transition hover:border-blue-200 hover:shadow-md">
+      <div>
+        {categoryLabel && (
+          <span className="inline-flex items-center max-w-full mb-3 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium tracking-wide uppercase">
+            <span className="truncate">{categoryLabel}</span>
+          </span>
+        )}
+
+        <h3 className="text-xl font-semibold text-gray-900 mb-2 leading-snug">
+          {career.title?.value}
+        </h3>
+
+        <p className="text-gray-600 text-sm mb-5 line-clamp-3 leading-relaxed">
+          {career.description?.value}
+        </p>
+      </div>
+
+      <div className={`flex items-center mt-auto gap-3 ${readOnly ? "justify-end" : "justify-between"}`}>
         {!readOnly && (
           <button
             onClick={() => {
               onSelectCareer(career);
               window.open(`${careerPathPrefix}/${career.id}`, "_blank");
             }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
           >
             {language === "mr" ? "मार्ग पहा" : "Show Path"}
           </button>
         )}
 
-        <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
+        <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap">
           {career.similarity}%{" "}
           {language === "mr" ? "जुळणारे" : "match"}
         </span>
