@@ -163,8 +163,9 @@ export default function PrintableAptitudeStrengthsA4({
         width: "210mm",
         padding: "10mm",
         background: "#fff",
+        pageBreakAfter: "always",
+        breakAfter: "page",
       }}
-      className="print:break-inside-avoid"
     >
       {/* HEADER */}
       <div className="text-center mb-8">
@@ -179,7 +180,6 @@ export default function PrintableAptitudeStrengthsA4({
             ? "या गुणांमुळे तुम्हाला कोणत्या गोष्टी सहज जमतात ते समजते."
             : "These scores show what skills come naturally to you."}
         </p>
-        {/* light horizontal line */}
         <div className="mt-6 mb-6">
           <hr
             style={{ border: "none", height: 1, backgroundColor: "#eef2f7" }}
@@ -194,16 +194,22 @@ export default function PrintableAptitudeStrengthsA4({
 
       {/* TOP SECTION */}
       <div className="grid grid-cols-12 gap-4 items-center">
-
-        {/* CHART BIG */}
         <div className="col-span-8 flex justify-center">
           <BarChart
             width={440}
-            height={300}
+            height={320}
             data={chartData}
+            margin={{ top: 0, right: 20, left: 0, bottom: 40 }}
           >
             <CartesianGrid stroke="#e5e7eb" />
-            <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+            <XAxis
+              dataKey="name"
+              interval={0}
+              angle={-25}
+              textAnchor="end"
+              height={70}
+              tick={{ fontSize: 10, fill: "#4b5563" }}
+            />
             <YAxis domain={[0, 10]} />
             <Tooltip />
             <Bar dataKey="score" fill="#2563eb" isAnimationActive={false}>
@@ -212,7 +218,6 @@ export default function PrintableAptitudeStrengthsA4({
           </BarChart>
         </div>
 
-        {/* IMAGE */}
         <div className="col-span-4 flex justify-center">
           <img
             src={AptitudeImg}
@@ -220,7 +225,6 @@ export default function PrintableAptitudeStrengthsA4({
             className="w-[240px] h-[220px] object-contain"
           />
         </div>
-
       </div>
 
       {/* CARDS */}
@@ -229,7 +233,6 @@ export default function PrintableAptitudeStrengthsA4({
           <AptitudeCard key={t.code} trait={t} language={language} />
         ))}
 
-        {/* MOTIVATION */}
         <div className="bg-white border border-gray-50 rounded-2xl p-5 flex items-center justify-center text-center">
           <p className="text-5xl font-bold">
             <span className="text-gray-900">
@@ -242,7 +245,6 @@ export default function PrintableAptitudeStrengthsA4({
           </p>
         </div>
       </div>
-
     </div>
   );
 }

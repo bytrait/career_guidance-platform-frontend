@@ -168,6 +168,8 @@ export default function PrintablePersonalityStrengthsA4({
         width: "210mm",
         padding: "10mm",
         background: "#fff",
+        pageBreakAfter: "always",
+        breakAfter: "page",
       }}
     >
       {/* HEADER (unchanged, just tighter spacing) */}
@@ -197,9 +199,9 @@ export default function PrintablePersonalityStrengthsA4({
             : "Let's explore your personality traits to see what makes you unique and how you like to think and learn."}
         </p>
       </div>
+
       {/* MAIN GRID - FORCE 2 COLUMN */}
       <div className="grid grid-cols-12 gap-4 mt-6">
-
         {/* IMAGE (smaller column) */}
         <div className="col-span-4 flex justify-center items-center">
           <img
@@ -212,13 +214,20 @@ export default function PrintablePersonalityStrengthsA4({
         {/* CHART (bigger column) */}
         <div className="col-span-8 flex justify-center">
           <BarChart
-            width={420}   // 👈 increased
-            height={260}  // 👈 increased
+            width={420}
+            height={280}
             data={chartData}
-            margin={{ top: 0, right: 20, left: -20, bottom: 10 }}
+            margin={{ top: 0, right: 20, left: -20, bottom: 40 }}
           >
             <CartesianGrid stroke="#e5e7eb" />
-            <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+            <XAxis
+              dataKey="name"
+              interval={0}
+              angle={-25}
+              textAnchor="end"
+              height={70}
+              tick={{ fontSize: 10, fill: "#4b5563" }}
+            />
             <YAxis />
             <Tooltip />
             <Bar dataKey="value" fill="#2563eb" isAnimationActive={false}>
@@ -226,8 +235,8 @@ export default function PrintablePersonalityStrengthsA4({
             </Bar>
           </BarChart>
         </div>
-
       </div>
+
       <div className="w-full mt-10 mb-4">
         <h3 className="text-2xl font-semibold text-gray-800">
           {language === "mr"
@@ -241,6 +250,7 @@ export default function PrintablePersonalityStrengthsA4({
             : "A deeper understanding of your personality traits"}
         </p>
       </div>
+
       {/* TRAITS - FORCE 2 COLUMN */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-6">
         {traits.map((t) => (
@@ -250,7 +260,6 @@ export default function PrintablePersonalityStrengthsA4({
         {/* 6th Card (Motivation) */}
         <div className="bg-white border border-gray-50 rounded-2xl p-6 flex items-center justify-center text-center h-full">
           <p className="text-xl sm:text-5xl font-bold leading-relaxed">
-
             <span className="text-gray-900">
               {language === "mr"
                 ? "तुमच्यातील प्रत्येक गुण"
@@ -264,11 +273,9 @@ export default function PrintablePersonalityStrengthsA4({
                 ? "तुमची ताकद आहे"
                 : "is your strength"}
             </span>
-
           </p>
         </div>
       </div>
-
     </div>
   );
 }

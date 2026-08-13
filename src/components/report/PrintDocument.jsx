@@ -107,12 +107,12 @@ export default function PrintDocument({
 
   return (
     <div id="print-root">
-      {/* SINGLE-PAGE SECTIONS */}
+      {/* Content flows naturally (~2 pages each); pageBreakAfter keeps next section clean */}
       <PrintablePersonalityStrengths
         scores={scores}
         language={language}
       />
-        {/* <PersonalityStrengths scores={scores} language={language} /> */}
+      {/* <PersonalityStrengths scores={scores} language={language} /> */}
 
       <PrintableCareerInterests
         scores={scores}
@@ -124,23 +124,22 @@ export default function PrintDocument({
         language={language}
       />
 
-      {/* MULTI-PAGE SECTION (handles its own pages) */}
+      {/* Career sections keep their own print-page logic */}
       <PrintableCareerOptions
         scores={scores}
         careers={orderedCareers}
         language={language}
       />
 
-      {/* CAREER DETAIL PAGES (each renders its own print-page) */}
       {orderedCareers
         .filter(c => selectedCareerIds.includes(c.id))
         .map(career => (
           <div className="mb-[60px]" key={career.id}>
-          <PrintableCareerDetail
-            key={career.id}
-            career={career}
-            language={language}
-          />
+            <PrintableCareerDetail
+              key={career.id}
+              career={career}
+              language={language}
+            />
           </div>
         ))}
     </div>

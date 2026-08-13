@@ -132,12 +132,12 @@ export default function PrintableCareerInterestsA4({
         width: "210mm",
         padding: "10mm",
         background: "#fff",
+        pageBreakAfter: "always",
+        breakAfter: "page",
       }}
-      className="mt-8"
     >
       {/* HEADER */}
-       <div className="text-center mb-10">
-        {/* Icon + Title */}
+      <div className="text-center mb-10">
         <div className="flex justify-center items-center gap-4 mb-2">
           <i className="bi bi-compass text-4xl text-blue-600" />
 
@@ -146,12 +146,9 @@ export default function PrintableCareerInterestsA4({
           </h1>
         </div>
 
-
-        {/* Description */}
         <p className="text-sm text-gray-600 max-w-xl mx-auto leading-relaxed">
           {UI_TEXT[language]?.description}
         </p>
-        {/* light horizontal line */}
         <div className="mt-6 mb-6">
           <hr
             style={{ border: "none", height: 1, backgroundColor: "#eef2f7" }}
@@ -161,8 +158,6 @@ export default function PrintableCareerInterestsA4({
 
       {/* TOP SECTION (FORCED 2 COLUMN) */}
       <div className="grid grid-cols-12 gap-4 items-center">
-
-        {/* CHART BIG */}
         <div className="col-span-8 flex justify-center">
           <RadarChart
             width={420}
@@ -186,7 +181,6 @@ export default function PrintableCareerInterestsA4({
           </RadarChart>
         </div>
 
-        {/* IMAGE SMALL */}
         <div className="col-span-4 flex justify-center">
           <img
             src={InterestImg}
@@ -194,7 +188,6 @@ export default function PrintableCareerInterestsA4({
             className="w-[240px] h-[220px] object-contain"
           />
         </div>
-
       </div>
 
       {/* CARDS */}
@@ -208,7 +201,6 @@ export default function PrintableCareerInterestsA4({
             <InterestCard key={t.code} trait={t} language={language} />
           ))}
 
-          {/* Motivation (UNCHANGED) */}
           <div className="bg-white border border-gray-50 rounded-2xl p-5 flex items-center justify-center text-center">
             <p className="text-5xl font-bold leading-relaxed">
               <span className="text-gray-900">
