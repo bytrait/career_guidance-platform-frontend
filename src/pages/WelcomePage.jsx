@@ -55,7 +55,7 @@ export default function WelcomePage() {
         </p>
 
         {/* Video */}
-        <p className="font-medium text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Please watch the video below before you begin</p>
+        {/* <p className="font-medium text-gray-900 mb-2 sm:mb-3 text-sm sm:text-base">Please watch the video below before you begin</p>
         <div className="w-full flex justify-center mb-4">
           <div className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-2xl aspect-video">
             <iframe
@@ -68,7 +68,7 @@ export default function WelcomePage() {
               allowFullScreen
             ></iframe>
           </div>
-        </div>
+        </div> */}
 
         {/* Action Button */}
         <div className="flex flex-col sm:flex-row justify-end items-center gap-2 mt-2">
