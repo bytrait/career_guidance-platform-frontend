@@ -7,6 +7,7 @@ import InterestInstructions from "../components/Assessment/InterestInstructions"
 import RIASECCompletionModal from "../components/Assessment/RIASECCompletionModal";
 import AptitudeInstructions from "../components/Assessment/AptitudeInstructions";
 import OceanInstructions from "../components/Assessment/OceanInstructions"; // NEW
+import { shuffleArray } from "../utils/shuffle.util";
 import {
   fetchAssessmentQuestions,
   submitScores,
@@ -68,6 +69,13 @@ export default function AssessmentPage() {
   useEffect(() => {
     if (assessmentType === "COMPLETED" || assessmentType === null) return;
 
+    const cachedQuestions = getFromLocalStorage(`assessment_questions_${assessmentType}`);
+    if (cachedQuestions && Array.isArray(cachedQuestions) && cachedQuestions.length > 0) {
+      setQuestions(cachedQuestions);
+      setCurrent(0);
+      return;
+    }
+
     setLoading(true);
     fetchAssessmentQuestions(assessmentType)
       .then((data) => {
@@ -81,26 +89,24 @@ export default function AssessmentPage() {
             order: q.order,
           }));
         } else {
-
           formatted = data.flatMap((trait) =>
-            console.log(trait) ||
-            trait.questions
-              .sort((a, b) => a.order - b.order)
-              .map((q) => ({
-                id: q.id,
-                text: q.text,
-                reverse: q.reverse,
-                trait: {
-                  id: trait.id,
-                  code: trait.code,
-                  name: trait.name,
-                },
-                order: q.order,
-              }))
+            trait.questions.map((q) => ({
+              id: q.id,
+              text: q.text,
+              reverse: q.reverse,
+              trait: {
+                id: trait.id,
+                code: trait.code,
+                name: trait.name,
+              },
+              order: q.order,
+            }))
           );
         }
 
-        setQuestions(formatted);
+        const randomized = shuffleArray(formatted);
+        setQuestions(randomized);
+        saveToLocalStorage(`assessment_questions_${assessmentType}`, randomized);
         setCurrent(0);
         setLoading(false);
       })
@@ -192,6 +198,7 @@ export default function AssessmentPage() {
 
     await submitScoresToAPI();
     saveToLocalStorage("assessment_answers", {});
+    localStorage.removeItem(`assessment_questions_${assessmentType}`);
 
     if (assessmentType === "OCEAN") {
       await updateUserProgress("RIASEC");
@@ -218,6 +225,7 @@ export default function AssessmentPage() {
     setShowInterestInstructions(false);
     setAssessmentType("RIASEC");
     saveToLocalStorage("assessment_type", "RIASEC");
+    saveToLocalStorage("assessment_answers", {});
     setAnswers({});
   };
 
@@ -225,6 +233,7 @@ export default function AssessmentPage() {
     setShowAptitudeInstructions(false);
     setAssessmentType("APTITUDE");
     saveToLocalStorage("assessment_type", "APTITUDE");
+    saveToLocalStorage("assessment_answers", {});
     setAnswers({});
   };
 

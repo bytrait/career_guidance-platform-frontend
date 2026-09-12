@@ -12,6 +12,7 @@ import RIASECCompletionModal from "../../components/Assessment/RIASECCompletionM
 import AptitudeInstructions from "./DemoAptitudeInstructions";
 
 import { getFromLocalStorage, saveToLocalStorage } from "../../utils/localStorage.util";
+import { shuffleArray } from "../../utils/shuffle.util";
 
 import { OCEAN, RIASEC, APTITUDE } from "../../data/demoQuestions";
 
@@ -47,6 +48,14 @@ export default function DemoAssessmentPage() {
   // Load questions when assessmentType changes
   // ------------------------------------------------
   useEffect(() => {
+    const cachedQuestions = getFromLocalStorage(`demo_assessment_questions_${assessmentType}`);
+    if (cachedQuestions && Array.isArray(cachedQuestions) && cachedQuestions.length > 0) {
+      setQuestions(cachedQuestions);
+      setCurrent(0);
+      setLoading(false);
+      return;
+    }
+
     let formatted = [];
 
     // --------------------------------------------
@@ -121,8 +130,9 @@ export default function DemoAssessmentPage() {
       );
     }
 
-    formatted.sort((a, b) => a.order - b.order);
-    setQuestions(formatted);
+    const randomized = shuffleArray(formatted);
+    setQuestions(randomized);
+    saveToLocalStorage(`demo_assessment_questions_${assessmentType}`, randomized);
     setCurrent(0);
     setLoading(false);
   }, [assessmentType]);
@@ -203,6 +213,8 @@ export default function DemoAssessmentPage() {
 
     const scores = calculateScores();
     saveToLocalStorage(`demo_scores_${assessmentType}`, scores);
+    saveToLocalStorage("demo_assessment_answers", {});
+    localStorage.removeItem(`demo_assessment_questions_${assessmentType}`);
 
     // Flow control:
     if (assessmentType === "OCEAN") {
@@ -227,6 +239,7 @@ export default function DemoAssessmentPage() {
     setShowInterestInstructions(false);
     setShowOceanInstructions(false);
     setAssessmentType("RIASEC");
+    saveToLocalStorage("demo_assessment_answers", {});
     setAnswers({});
   };
 
@@ -243,6 +256,7 @@ export default function DemoAssessmentPage() {
   const startAptitudeTest = () => {
     setShowAptitudeInstructions(false);
     setAssessmentType("APTITUDE");
+    saveToLocalStorage("demo_assessment_answers", {});
     setAnswers({});
   };
 
