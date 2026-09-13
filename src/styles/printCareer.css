@@ -6,9 +6,14 @@
     break-after: page;
     box-sizing: border-box;
   }
-  .career-detail-page {
-    page-break-before: always;
-    break-before: page;
+  .career-detail-page,
+  .career-detail-wrapper {
+    display: block !important;
+    width: 100% !important;
+    page-break-before: always !important;
+    page-break-after: always !important;
+    break-before: page !important;
+    break-after: page !important;
   }
   * {
     -webkit-print-color-adjust: exact !important;

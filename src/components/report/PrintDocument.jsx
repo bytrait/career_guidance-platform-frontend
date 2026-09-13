@@ -135,9 +135,11 @@ export default function PrintDocument({
         .filter(c => selectedCareerIds.includes(c.id))
         .map(career => (
           <div
-            className="print-page career-detail-page font-sans text-gray-900"
+            className="career-detail-wrapper font-sans text-gray-900"
             key={career.id}
             style={{
+              display: "block",
+              width: "100%",
               boxSizing: "border-box",
               padding: "6mm 10mm",
               pageBreakBefore: "always",
