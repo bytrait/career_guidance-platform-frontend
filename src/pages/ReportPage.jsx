@@ -1,4 +1,3 @@
-// src/pages/ReportPage.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ReactDOM from "react-dom/client";
@@ -16,21 +15,24 @@ import { getPreference } from "../services/preferenceService";
 import { getRecommendedCareers } from "../services/careerService";
 import { fetchUserDetailsById } from "../services/userAssessmentProgressService";
 
+import { downloadReportPDF } from "../services/reportService";
+
 import PersonalityStrengths from "../components/report/PersonalityStrengths";
 import CareerInterests from "../components/report/CareerInterests";
 import AptitudeChart from "../components/report/AptitudeChart";
 import CareerOptions from "../components/report/CareerOptions";
+import CareerPrintModal from "../components/report/CareerPrintModal";
 import Spinner from "../components/common/Spinner";
 
 import PrintDocument from "../components/report/PrintDocument";
 import PrintCoverPage from "../components/report/PrintCoverPage";
 import ReportOverviewPage from "../components/report/ReportOverviewPage";
-import ReportIndexPage from "../components/report/ReportIndexPage";
 
 /* ------------------ PRINT STYLES ------------------ */
 function collectStylesForIframe() {
   const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
   const styles = Array.from(document.querySelectorAll("style"));
+  const origin = window.location.origin;
 
   const linkTags = links
     .map(l => (l.href ? `<link rel="stylesheet" href="${l.href}" />` : ""))
@@ -41,17 +43,20 @@ function collectStylesForIframe() {
     .join("\n");
 
   return `
+    <base href="${origin}/" />
     ${linkTags}
     ${styleTags}
-    <link rel="stylesheet" href="/src/styles/printCareer.css" />
+    <link rel="stylesheet" href="${origin}/src/styles/printCareer.css" />
 
     <style>
-      @page { size: A4 portrait;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
+      @page {
+        size: A4 portrait;
+        margin: 0;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
 
-      @media print {
+      @media print, all {
         .print-page {
           page-break-after: always;
         }
@@ -72,35 +77,14 @@ function collectStylesForIframe() {
   `;
 }
 
-/* ------------------ NEW: WAIT FOR IFRAME ASSETS ------------------ */
-async function waitForIframeAssets(doc) {
-  const images = Array.from(doc.images || []);
-
-  const imagePromises = images.map(img => {
-    if (img.complete && img.naturalHeight > 0) return Promise.resolve();
-    return new Promise(resolve => {
-      img.onload = img.onerror = resolve;
-    });
-  });
-
-  const fontPromise = doc.fonts ? doc.fonts.ready : Promise.resolve();
-
-  await Promise.all([...imagePromises, fontPromise]);
-
-  // small safety buffer so fonts actually paint
-  await new Promise(r => setTimeout(r, 500));
-}
-
-/* ------------------ MAIN COMPONENT ------------------ */
 export default function ReportPage() {
   const dispatch = useDispatch();
-
   const offscreenRootRef = useRef(null);
-  const iframeRef = useRef(null);
 
   const [userDetails, setUserDetails] = useState(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [selectedCareerIds, setSelectedCareerIds] = useState([]);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const { scores, language, economicStatus, recommendedCareers } = useSelector(
     s => s.report
@@ -166,39 +150,32 @@ export default function ReportPage() {
     setShowPrintModal(true);
   }
 
-  /* ------------------ OFFSCREEN ROOT ------------------ */
   function ensureOffscreenRoot() {
     if (offscreenRootRef.current) return offscreenRootRef.current;
 
     const div = document.createElement("div");
     div.style.position = "fixed";
     div.style.left = "-9999px";
+    div.style.top = "0";
+    div.style.width = "210mm";
     document.body.appendChild(div);
     offscreenRootRef.current = div;
     return div;
   }
 
-  function ensureIframe() {
-    if (iframeRef.current) return iframeRef.current;
+  /* ------------------ PRINT / DOWNLOAD PDF ------------------ */
+  async function handleDownloadPDF() {
+    setIsDownloading(true);
 
-    const iframe = document.createElement("iframe");
-    iframe.style.display = "none";
-    document.body.appendChild(iframe);
-    iframeRef.current = iframe;
-    return iframe;
-  }
-
-  /* ------------------ PRINT ------------------ */
-  async function handlePrint() {
     const container = ensureOffscreenRoot();
     container.innerHTML = "";
 
     const root = ReactDOM.createRoot(container);
+
     root.render(
       <>
         <PrintCoverPage userDetails={userDetails} language={language} />
         <ReportOverviewPage />
-        {/* <ReportIndexPage /> */}
         <PrintDocument
           scores={scores}
           language={language}
@@ -208,39 +185,62 @@ export default function ReportPage() {
       </>
     );
 
-    await new Promise(r => setTimeout(r, 300));
+    await new Promise(r => setTimeout(r, 500));
 
-    const html = container.innerHTML;
     const styles = collectStylesForIframe();
 
     const finalHTML = `
-      <!doctype html>
-      <html>
-        <head>
-          <meta charset="utf-8" />
-          <title>${userDetails?.fullName || "Report"}</title>
-          ${styles}
-        </head>
-        <body>${html}</body>
-      </html>
+    <!doctype html>
+    <html>
+      <head>
+        <base href="${window.location.origin}" />
+        <meta charset="utf-8" />
+        <title>${userDetails?.fullName || "Report"}</title>
+        ${styles}
+      </head>
+      <body>
+        ${container.innerHTML}
+      </body>
+    </html>
     `;
 
-    const iframe = ensureIframe();
-    const doc = iframe.contentDocument;
-    doc.open();
-    doc.write(finalHTML);
-    doc.close();
+    try {
+      const response = await downloadReportPDF({
+        html: finalHTML,
+        studentName: userDetails?.fullName,
+      });
 
-    // ✅ SAME setTimeout, just waiting correctly
-    setTimeout(async () => {
-      await waitForIframeAssets(doc);
-      iframe.contentWindow.print();
-    }, 300);
+      const blob = new Blob([response.data], {
+        type: "application/pdf",
+      });
 
-    root.unmount();
-    container.remove();
-    offscreenRootRef.current = null;
-    setShowPrintModal(false);
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+
+      const brandSlug = "ByTrait";
+      const fileName = `${userDetails?.fullName || "Student"}_${brandSlug}_Report_${new Date()
+        .toISOString()
+        .slice(0, 10)}.pdf`;
+
+      link.href = url;
+      link.setAttribute("download", fileName);
+
+      document.body.appendChild(link);
+      link.click();
+
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF download failed:", error);
+      alert("PDF download failed. Please try again.");
+    } finally {
+      setIsDownloading(false);
+      root.unmount();
+      container.remove();
+      offscreenRootRef.current = null;
+      setShowPrintModal(false);
+    }
   }
 
   /* ------------------ RENDER ------------------ */
@@ -251,36 +251,48 @@ export default function ReportPage() {
         <div className="flex gap-2 bg-gray-100 p-1 rounded-full">
           <button
             onClick={() => dispatch(setLanguage("en"))}
-            className={`px-3 py-1 rounded-full ${language === "en" ? "bg-blue-600 text-white" : ""}`}
+            className={`px-3 py-1 rounded-full font-medium text-sm transition ${
+              language === "en" ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:text-gray-900"
+            }`}
           >
             English
           </button>
           <button
             onClick={() => dispatch(setLanguage("mr"))}
-            className={`px-3 py-1 rounded-full ${language === "mr" ? "bg-blue-600 text-white" : ""}`}
+            className={`px-3 py-1 rounded-full font-medium text-sm transition ${
+              language === "mr" ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:text-gray-900"
+            }`}
           >
             मराठी
           </button>
         </div>
       </div>
 
-      {/* Print Button */}
-      <div className="max-w-7xl mx-auto px-2 mb-6 no-print">
+      {/* Download PDF Button */}
+      <div className="max-w-7xl mx-auto px-4 mb-6 no-print">
         <div className="flex justify-end">
           <button
             onClick={openPrintModal}
-            className="px-4 py-2 bg-blue-600 text-white rounded shadow"
+            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition flex items-center gap-2 text-sm"
           >
-            {language === "mr" ? "प्रिंट अहवाल" : "Print Report"}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            <span>{language === "mr" ? "अहवाल डाउनलोड करा (PDF)" : "Download PDF Report"}</span>
           </button>
         </div>
       </div>
 
       {/* Screen Content */}
-      <div className="max-w-7xl mx-auto px-2 space-y-16">
-        <h1 className="text-5xl font-semibold mb-8 text-gray-800">
-          {userDetails?.fullName}
-        </h1>
+      <div className="max-w-7xl mx-auto px-4 space-y-16 pb-16">
+        <div className="border-b border-gray-200 pb-4">
+          <h1 className="text-4xl font-bold text-gray-900">
+            {userDetails?.fullName || "Student Career Report"}
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Personalized Psychometric &amp; Career Guidance Analysis
+          </p>
+        </div>
 
         <PersonalityStrengths scores={scores} language={language} />
         <CareerInterests scores={scores} language={language} />
@@ -301,52 +313,18 @@ export default function ReportPage() {
         </section>
       </div>
 
-      {/* PRINT MODAL */}
+      {/* DOWNLOAD PDF MODAL */}
       {showPrintModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black opacity-40" />
-          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-xl p-6">
-            <h2 className="text-xl font-semibold mb-4">
-              Select Careers to Print
-            </h2>
-
-            <div className="max-h-64 overflow-y-auto border p-3 rounded">
-              {recommendedCareers.map(c => (
-                <label key={c.id} className="flex gap-3 py-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={selectedCareerIds.includes(c.id)}
-                    onChange={() => toggleCareer(c.id)}
-                  />
-                  <div>
-                    <div className="font-semibold">{c.title?.value}</div>
-                    <div className="text-sm text-gray-600 line-clamp-2">
-                      {c.description?.value}
-                    </div>
-                  </div>
-                </label>
-              ))}
-            </div>
-
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => setShowPrintModal(false)}
-                className="px-4 py-2 bg-gray-200 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handlePrint}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
-              >
-                Print
-              </button>
-            </div>
-          </div>
-        </div>
+        <CareerPrintModal
+          careers={recommendedCareers}
+          selectedCareerIds={selectedCareerIds}
+          onToggle={toggleCareer}
+          onClose={() => setShowPrintModal(false)}
+          onPrint={handleDownloadPdf}
+          language={language}
+          downloading={downloading}
+        />
       )}
-
-      <iframe ref={iframeRef} style={{ display: "none" }} title="print" />
     </>
   );
 }

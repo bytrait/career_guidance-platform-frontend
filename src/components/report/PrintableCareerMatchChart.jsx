@@ -5,8 +5,8 @@ import careerImg from "../../assets/career.png";
 function getBarColor(value) {
   if (value >= 80) return "#2563eb"; // strong blue
   if (value >= 60) return "#3b82f6"; // medium blue
-  if (value >= 40) return "#93c5fd"; // light blue
-  return "#cbd5e1"; // muted
+  if (value >= 40) return "#60a5fa"; // light blue
+  return "#94a3b8"; // muted
 }
 
 /* ------------------ COMPONENT ------------------ */
@@ -24,11 +24,17 @@ export default function PrintableCareerMatchChart({
 
   return (
     <div
-      className="w-full text-gray-800 print-page print:break-inside-avoid"
+      className="print-page font-sans text-gray-800"
       style={{
+        width: "210mm",
+        minHeight: "297mm",
+        boxSizing: "border-box",
+        padding: "10mm 14mm",
+        background: "#ffffff",
         display: "flex",
         flexDirection: "column",
-        minHeight: "100vh",
+        pageBreakAfter: "always",
+        breakAfter: "page",
       }}
     >
       {/* ================= CONTENT ================= */}
@@ -36,13 +42,13 @@ export default function PrintableCareerMatchChart({
         {/* ================= HEADER ================= */}
         <div className="text-center mb-2">
           <div className="flex justify-center items-center gap-3 mb-1">
-            <i className="bi bi-bullseye text-4xl text-blue-600" />
-            <h2 className="text-4xl font-bold text-blue-900">
+            <i className="bi bi-bullseye text-3xl" style={{ color: "#2563eb" }} />
+            <h2 className="text-3xl font-bold" style={{ color: "#1e3a8a" }}>
               {language === "mr" ? "करिअर समूह" : "Career Clusters"}
             </h2>
           </div>
 
-          <p className="text-sm text-gray-600 max-w-xl mx-auto">
+          <p className="text-xs text-gray-500 max-w-xl mx-auto">
             {language === "mr"
               ? "हे करिअर क्लस्टर्स तुमच्या व्यक्तिमत्वाच्या ताकदी आणि करिअर आवडींशी किती जुळतात यावर आधारित क्रमवारी लावलेले आहेत."
               : "These careers clusters are ranked based on how well they suit your personality strengths and career interest."}
@@ -51,43 +57,43 @@ export default function PrintableCareerMatchChart({
           <div className="mt-2 h-px bg-gray-200" />
         </div>
 
-        <img src={careerImg} alt="Career" className="mx-auto h-[300px]" />
+        <img src={careerImg} alt="Career" className="mx-auto h-[220px] object-contain mb-2" />
 
         {/* ================= BAR LIST ================= */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {chartData.slice(0, 10).map((item, idx) => {
             const color = getBarColor(item.value);
 
             return (
               <div
                 key={idx}
-                className="py-1"
+                className="py-0.5"
                 style={{ pageBreakInside: "avoid" }}
               >
                 {/* -------- TOP ROW -------- */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
                     {item.icon && (
                       <i
-                        className={`bi ${item.icon} text-2xl`}
+                        className={`bi ${item.icon} text-lg`}
                         style={{ color: "#2563eb" }}
                       />
                     )}
-                    <span className="font-semibold text-gray-900 text-base">
+                    <span className="font-semibold text-sm" style={{ color: "#1e293b" }}>
                       {item.name}
                     </span>
                   </div>
 
                   <span
-                    className="text-sm font-bold"
-                    style={{ color }}
+                    className="text-xs font-bold"
+                    style={{ color: color }}
                   >
                     {item.value}%
                   </span>
                 </div>
 
                 {/* -------- BAR -------- */}
-                <div className="w-full h-3 rounded-full bg-gray-200 overflow-hidden">
+                <div className="w-full h-2.5 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
                   <div
                     style={{
                       width: `${item.value}%`,
@@ -103,7 +109,7 @@ export default function PrintableCareerMatchChart({
         </div>
       </div>
 
-      {/* ================= FOOTER (PAGE 04) ================= */}
+      {/* ================= FOOTER (PAGE 04 / 09) ================= */}
       <div
         style={{
           marginTop: "auto",

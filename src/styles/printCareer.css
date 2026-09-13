@@ -1,5 +1,21 @@
 /* ===== Career Printable Content Styling ===== */
 
+@media print, all {
+  .print-page {
+    page-break-after: always;
+    break-after: page;
+    box-sizing: border-box;
+  }
+  .career-detail-page {
+    page-break-before: always;
+    break-before: page;
+  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
 .careerContentContainer {
   line-height: 1.75;
   color: #1f2937;

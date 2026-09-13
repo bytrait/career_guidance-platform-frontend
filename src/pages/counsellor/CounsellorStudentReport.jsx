@@ -7,25 +7,29 @@ import PersonalityStrengths from "../../components/report/PersonalityStrengths";
 import CareerInterests from "../../components/report/CareerInterests";
 import AptitudeChart from "../../components/report/AptitudeChart";
 import CareerOptions from "../../components/report/CareerOptions";
+import CareerPrintModal from "../../components/report/CareerPrintModal";
 import Spinner from "../../components/common/Spinner";
 
 import PrintDocument from "../../components/report/PrintDocument";
 import PrintCoverPage from "../../components/report/PrintCoverPage";
+import ReportOverviewPage from "../../components/report/ReportOverviewPage";
 
 import { getStudentById, isAuthenticated } from "../../services/auth";
-
 import {
   getStudentScoresForCounsellor,
   getStudentPreferenceForCounsellor,
   getStudentDetailsForCounsellor,
 } from "../../services/counsellorService";
 import { getRecommendedCareers } from "../../services/careerService";
+import { downloadReportPDF } from "../../services/reportService";
 import { setSelectedCareer } from "../../store/reportSlice";
 
-/* ------------------ PRINT STYLES ------------------ */
-function collectStylesForIframe() {
+/* ------------------ COLLECT EXACT STYLES ------------------ */
+function collectReportStyles() {
   const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
   const styles = Array.from(document.querySelectorAll("style"));
+
+  const origin = window.location.origin;
 
   const linkTags = links
     .map(l => (l.href ? `<link rel="stylesheet" href="${l.href}" />` : ""))
@@ -36,14 +40,20 @@ function collectStylesForIframe() {
     .join("\n");
 
   return `
+    <base href="${origin}/" />
     ${linkTags}
     ${styleTags}
-    <link rel="stylesheet" href="/src/styles/printCareer.css" />
+    <link rel="stylesheet" href="${origin}/src/styles/printCareer.css" />
 
     <style>
-      @page { size: A4 portrait; margin: 12mm; }
+      @page {
+        size: A4 portrait;
+        margin: 0;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
 
-      @media print {
+      @media print, all {
         .print-page {
           page-break-after: always;
         }
@@ -64,31 +74,10 @@ function collectStylesForIframe() {
   `;
 }
 
-/* ------------------ NEW: WAIT FOR IFRAME ASSETS ------------------ */
-async function waitForIframeAssets(doc) {
-  const images = Array.from(doc.images || []);
-
-  const imagePromises = images.map(img => {
-    if (img.complete && img.naturalHeight > 0) return Promise.resolve();
-    return new Promise(resolve => {
-      img.onload = img.onerror = resolve;
-    });
-  });
-
-  const fontPromise = doc.fonts ? doc.fonts.ready : Promise.resolve();
-
-  await Promise.all([...imagePromises, fontPromise]);
-
-  // small buffer so fonts actually paint
-  await new Promise(r => setTimeout(r, 500));
-}
-
 export default function CounsellorStudentReport() {
   const { studentId } = useParams();
   const dispatch = useDispatch();
-
   const offscreenRootRef = useRef(null);
-  const iframeRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [careersLoading, setCareersLoading] = useState(false);
@@ -101,6 +90,7 @@ export default function CounsellorStudentReport() {
 
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [selectedCareerIds, setSelectedCareerIds] = useState([]);
+  const [downloading, setDownloading] = useState(false);
 
   const [studentProfile, setStudentProfile] = useState(null);
   const [counsellor, setCounsellor] = useState(null);
@@ -182,28 +172,6 @@ export default function CounsellorStudentReport() {
   // Don't require careers.length — empty list should still show the report
   const isLoading = loading || careersLoading || !scores.length;
 
-  /* ------------------ PRINT HELPERS ------------------ */
-  function ensureOffscreenRoot() {
-    if (offscreenRootRef.current) return offscreenRootRef.current;
-
-    const div = document.createElement("div");
-    div.style.position = "fixed";
-    div.style.left = "-9999px";
-    document.body.appendChild(div);
-    offscreenRootRef.current = div;
-    return div;
-  }
-
-  function ensureIframe() {
-    if (iframeRef.current) return iframeRef.current;
-
-    const iframe = document.createElement("iframe");
-    iframe.style.display = "none";
-    document.body.appendChild(iframe);
-    iframeRef.current = iframe;
-    return iframe;
-  }
-
   function toggleCareer(id) {
     setSelectedCareerIds(prev =>
       prev.includes(id)
@@ -212,60 +180,105 @@ export default function CounsellorStudentReport() {
     );
   }
 
-  async function handlePrint() {
-    const container = ensureOffscreenRoot();
-    container.innerHTML = "";
+  function openPrintModal() {
+    if (!selectedCareerIds.length && recommendedCareers.length) {
+      setSelectedCareerIds(recommendedCareers.slice(0, 3).map(c => c.id));
+    }
+    setShowPrintModal(true);
+  }
 
-    const root = ReactDOM.createRoot(container);
-    root.render(
-      <>
-        <PrintCoverPage
-          userDetails={studentProfile}
-          counsellorDetails={counsellor}
-          language={language}
-        />
-        <PrintDocument
-          scores={scores}
-          language={language}
-          recommendedCareers={recommendedCareers}
-          selectedCareerIds={selectedCareerIds}
-        />
-      </>
-    );
+  function ensureOffscreenRoot() {
+    if (offscreenRootRef.current) return offscreenRootRef.current;
 
-    await new Promise(r => setTimeout(r, 300));
+    const div = document.createElement("div");
+    div.style.position = "fixed";
+    div.style.left = "-9999px";
+    div.style.top = "0";
+    div.style.width = "210mm";
+    document.body.appendChild(div);
+    offscreenRootRef.current = div;
+    return div;
+  }
 
-    const html = container.innerHTML;
-    const styles = collectStylesForIframe();
+  /* ------------------ BACKEND PDF DOWNLOAD WITH EXACT REACT DESIGN ------------------ */
+  async function handleDownloadPdf() {
+    setDownloading(true);
+    let container = null;
+    let root = null;
+    try {
+      container = ensureOffscreenRoot();
+      container.innerHTML = "";
 
-    const finalHTML = `
-      <!doctype html>
-      <html>
-        <head>
-          <meta charset="utf-8" />
-          <title>${studentProfile?.fullName || "Student Report"}</title>
-          ${styles}
-        </head>
-        <body>${html}</body>
-      </html>
-    `;
+      root = ReactDOM.createRoot(container);
+      root.render(
+        <>
+          <PrintCoverPage
+            userDetails={studentProfile}
+            counsellorDetails={counsellor}
+            language={language}
+          />
+          <ReportOverviewPage />
+          <PrintDocument
+            scores={scores}
+            language={language}
+            recommendedCareers={recommendedCareers}
+            selectedCareerIds={selectedCareerIds}
+          />
+        </>
+      );
 
-    const iframe = ensureIframe();
-    const doc = iframe.contentDocument;
-    doc.open();
-    doc.write(finalHTML);
-    doc.close();
+      // Wait for React to mount all child charts, icons, and SVG elements
+      await new Promise(r => setTimeout(r, 400));
 
-    // ✅ SAME timeout, just waits correctly
-    setTimeout(async () => {
-      await waitForIframeAssets(doc);
-      iframe.contentWindow.print();
-    }, 300);
+      const innerHtml = container.innerHTML;
+      const styles = collectReportStyles();
 
-    root.unmount();
-    container.remove();
-    offscreenRootRef.current = null;
-    setShowPrintModal(false);
+      const finalHTML = `
+        <!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <title>${studentProfile?.fullName || "Student Report"}</title>
+            ${styles}
+          </head>
+          <body>${innerHtml}</body>
+        </html>
+      `;
+
+      const response = await downloadReportPDF({
+        html: finalHTML,
+        studentName: studentProfile?.fullName || student?.fullName || "Student",
+      });
+
+      // Trigger direct file download
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const brandSlug = "ByTrait";
+      const fileName = `${studentProfile?.fullName || "Student"}_${brandSlug}_Report_${new Date()
+        .toISOString()
+        .slice(0, 10)}.pdf`;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setShowPrintModal(false);
+    } catch (err) {
+      console.error("Failed to download student PDF report:", err);
+      alert("Failed to generate PDF report. Please try again.");
+    } finally {
+      if (root) {
+        root.unmount();
+      }
+      if (container) {
+        container.remove();
+        offscreenRootRef.current = null;
+      }
+      setDownloading(false);
+    }
   }
 
   /* ------------------ RENDER ------------------ */
@@ -278,17 +291,25 @@ export default function CounsellorStudentReport() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 pb-10">
-      <div className="flex justify-between items-center my-6">
-        <h1 className="text-4xl font-semibold text-gray-800">
-          {studentProfile?.fullName}
-        </h1>
+    <div className="max-w-7xl mx-auto px-4 pb-16">
+      <div className="flex justify-between items-center my-6 border-b border-gray-200 pb-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {studentProfile?.fullName || "Student Report"}
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Counsellor Evaluation &amp; Psychometric Analysis View
+          </p>
+        </div>
 
         <button
-          onClick={() => setShowPrintModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded"
+          onClick={openPrintModal}
+          className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition flex items-center gap-2 text-sm"
         >
-          Print Report
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          <span>Download PDF Report</span>
         </button>
       </div>
 
@@ -313,49 +334,17 @@ export default function CounsellorStudentReport() {
         </div>
       )}
 
-      {/* PRINT MODAL */}
+      {/* DOWNLOAD PDF MODAL */}
       {showPrintModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black opacity-40" />
-          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-xl p-6">
-            <h2 className="text-xl font-semibold mb-4">
-              Select Careers to Print
-            </h2>
-
-            <div className="max-h-64 overflow-y-auto border p-3 rounded">
-              {recommendedCareers.map(c => (
-                <label key={c.id} className="flex gap-3 py-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={selectedCareerIds.includes(c.id)}
-                    onChange={() => toggleCareer(c.id)}
-                  />
-                  <div>
-                    <div className="font-semibold">{c.title?.value}</div>
-                    <div className="text-sm text-gray-600 line-clamp-2">
-                      {c.description?.value}
-                    </div>
-                  </div>
-                </label>
-              ))}
-            </div>
-
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => setShowPrintModal(false)}
-                className="px-4 py-2 bg-gray-200 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handlePrint}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
-              >
-                Print
-              </button>
-            </div>
-          </div>
-        </div>
+        <CareerPrintModal
+          careers={recommendedCareers}
+          selectedCareerIds={selectedCareerIds}
+          onToggle={toggleCareer}
+          onClose={() => setShowPrintModal(false)}
+          onPrint={handleDownloadPdf}
+          language={language}
+          downloading={downloading}
+        />
       )}
     </div>
   );

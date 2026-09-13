@@ -27,18 +27,21 @@ function getSkillTag(userPct, idealPct, language) {
   const diff = idealPct - userPct;
 
   if (diff >= 25)
-    return language === "mr"
-      ? { text: "सराव", cls: "bg-red-100 text-red-700 border-red-300" }
-      : { text: "Needs-Focus", cls: "bg-red-100 text-red-700 border-red-300" };
+    return {
+      text: language === "mr" ? "सराव" : "Needs-Focus",
+      style: { backgroundColor: "#fef2f2", color: "#b91c1c", borderColor: "#fecaca" },
+    };
 
   if (diff >= 10)
-    return language === "mr"
-      ? { text: "चांगले", cls: "bg-yellow-100 text-yellow-700 border-yellow-300" }
-      : { text: "Good", cls: "bg-yellow-100 text-yellow-700 border-yellow-300" };
+    return {
+      text: language === "mr" ? "चांगले" : "Good",
+      style: { backgroundColor: "#fefce8", color: "#a16207", borderColor: "#fef08a" },
+    };
 
-  return language === "mr"
-    ? { text: "मजबूत", cls: "bg-green-100 text-green-700 border-green-300" }
-    : { text: "Strong", cls: "bg-green-100 text-green-700 border-green-300" };
+  return {
+    text: language === "mr" ? "मजबूत" : "Strong",
+    style: { backgroundColor: "#ecfdf5", color: "#047857", borderColor: "#a7f3d0" },
+  };
 }
 
 /* ------------------ DOT VISUAL ------------------ */
@@ -51,10 +54,10 @@ function SkillDots({ userScore = 0, idealScore = 0, max = 10 }) {
     <div className="flex gap-1">
       {Array.from({ length: max }).map((_, i) => {
         if (i < user)
-          return <span key={i} className="w-2.5 h-2.5 rounded-full bg-blue-600" />;
+          return <span key={i} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: "#2563eb" }} />;
         if (i < ideal)
-          return <span key={i} className="w-2.5 h-2.5 rounded-full bg-green-400" />;
-        return <span key={i} className="w-2.5 h-2.5 rounded-full bg-gray-200" />;
+          return <span key={i} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: "#10b981" }} />;
+        return <span key={i} className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: "#e2e8f0" }} />;
       })}
     </div>
   );
@@ -126,14 +129,49 @@ export default function PrintableCareerOptions({
     .filter((s) => s.assessmentType === "APTITUDE")
     .reduce((a, s) => ({ ...a, [s.traitOrCategoryCode]: s.score }), {});
 
-  /* -------- MATCH CHART DATA -------- */
+  function cosineSimilarity(user, ideal) {
+    let dot = 0;
+    let userMag = 0;
+    let idealMag = 0;
+
+    for (const key of ["R", "I", "A", "S", "E", "C"]) {
+      const u = Number(user[key]) || 0;
+      const i = Number(ideal[key]) || 0;
+
+      dot += u * i;
+      userMag += u * u;
+      idealMag += i * i;
+    }
+
+    if (userMag === 0 || idealMag === 0) {
+      return 0;
+    }
+
+    return dot / (Math.sqrt(userMag) * Math.sqrt(idealMag));
+  }
+
+  /* -------- MATCH CHART DATA (same logic as CareerOptions.jsx) -------- */
   const chartData = useMemo(() => {
-    const riasecScores = scores
+    if (!scores?.length || !careers?.length || !careerFields?.length) {
+      return [];
+    }
+
+    const userScoresObj = {
+      R: 0,
+      I: 0,
+      A: 0,
+      S: 0,
+      E: 0,
+      C: 0,
+    };
+
+    scores
       .filter((s) => s.assessmentType === "RIASEC")
-      .reduce((acc, s) => {
-        acc[s.traitOrCategoryCode] = s.score;
-        return acc;
-      }, {});
+      .forEach((s) => {
+        if (userScoresObj.hasOwnProperty(s.traitOrCategoryCode)) {
+          userScoresObj[s.traitOrCategoryCode] = Number(s.score) || 0;
+        }
+      });
 
     const categoryIds = [
       ...new Set(
@@ -149,23 +187,22 @@ export default function PrintableCareerOptions({
           (f) => f.category_id === id
         );
 
-        if (!field || !field.scores) return null;
+        if (!field || !field.scores) {
+          return null;
+        }
 
-        let weighted = 0;
-
-        ["R", "I", "A", "S", "E", "C"].forEach((key) => {
-          if (riasecScores[key] != null && field.scores[key] != null) {
-            weighted += (riasecScores[key] / 30) * field.scores[key];
-          }
-        });
+        const similarity = cosineSimilarity(
+          userScoresObj,
+          field.scores
+        );
 
         return {
-          category_id: id, // ✅ IMPORTANT
+          category_id: id,
           name:
             language === "mr"
               ? field.careerField?.mr
               : field.careerField?.en,
-          value: Math.round(weighted * 100),
+          value: Math.round(similarity * 100),
           icon: field.icon,
         };
       })
@@ -174,88 +211,67 @@ export default function PrintableCareerOptions({
   }, [scores, careers, language]);
 
   /* -------- CAREER CARD -------- */
-  const getCategoryLabel = (career) => {
-    const field = careerFields.find(
-      (f) => f.category_id === career.category_id
-    );
-
-    if (field?.careerField) {
-      return language === "mr"
-        ? field.careerField.mr
-        : field.careerField.en;
-    }
-
-    return (
-      career.category?.value ||
-      career.category?.[language] ||
-      career.category_name ||
-      null
-    );
-  };
-
   const CareerCard = ({ career }) => {
     const idealAptitude = career.aptitude || {};
-    const categoryLabel = getCategoryLabel(career);
 
     return (
-      <div className="rounded-3xl bg-white border border-blue-100 p-6 print:break-inside-avoid">
+      <div
+        className="rounded-2xl bg-white border p-5 shadow-sm"
+        style={{
+          borderColor: "#dbeafe",
+          pageBreakInside: "avoid",
+        }}
+      >
         {/* Header */}
-        <div className="flex items-start gap-3">
-          <i className="bi bi-briefcase-fill text-blue-600 text-lg mt-1" />
-          <div className="min-w-0 flex-1">
-            {categoryLabel && (
-              <span className="inline-flex items-center max-w-full mb-1.5 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[11px] font-medium tracking-wide uppercase">
-                <span className="truncate">{categoryLabel}</span>
-              </span>
-            )}
-            <h4 className="text-lg font-semibold text-gray-900 leading-snug">
-              {career.title?.value}
-            </h4>
-          </div>
+        <div className="flex items-start gap-2.5 mb-1">
+          <i className="bi bi-briefcase-fill text-lg" style={{ color: "#2563eb" }} />
+          <h4 className="text-base font-bold" style={{ color: "#1e3a8a" }}>
+            {career.title?.value || career.title}
+          </h4>
         </div>
 
-        <p className="text-sm text-gray-600 mt-1">
-          {career.description?.value}
+        <p className="text-xs text-gray-600 leading-relaxed mb-3">
+          {career.description?.value || career.description}
         </p>
 
-        <div className="grid grid-cols-12 gap-2 mt-4 items-center">
+        <div className="grid grid-cols-12 gap-2 items-center">
           <div className="col-span-5 flex items-center justify-center">
-            <div className="p-4 flex flex-col items-center justify-center h-full">
+            <div className="p-2 flex flex-col items-center justify-center h-full">
               <div className="relative flex items-center justify-center">
                 <CareerFitRing value={career.similarity} />
                 <div className="absolute text-center">
-                  <div className="text-lg font-bold text-blue-700">
+                  <div className="text-base font-bold" style={{ color: "#1e3a8a" }}>
                     {career.similarity}%
                   </div>
                 </div>
               </div>
-              <div className="text-xs font-semibold text-blue-900 mb-2">
+              <div className="text-xs font-semibold mt-1" style={{ color: "#2563eb" }}>
                 {language === "mr" ? "करिअर जुळवणी" : "Career Fit"}
               </div>
             </div>
           </div>
 
           <div className="col-span-7">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="text-sm font-semibold text-gray-800 mb-3">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="text-xs font-bold" style={{ color: "#1e293b" }}>
                 {language === "mr"
-                  ? "या करिअर साठी क्षमता संरेखन"
-                  : "Ability Alignment for This Career"}
+                  ? "क्षमता संरेखन"
+                  : "Ability Alignment"}
               </div>
 
-              <div className="flex items-center gap-2 text-sm mb-4 text-gray-600">
+              <div className="flex items-center gap-2 text-[11px] text-gray-500">
                 <div className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#2563eb" }} />
                   {language === "mr" ? "तुमची क्षमता" : "Your Ability"}
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-400" />
-                  {language === "mr" ? "आवश्यक क्षमता" : "Required Ability"}
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#10b981" }} />
+                  {language === "mr" ? "आवश्यक" : "Required"}
                 </div>
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               {Object.entries(idealAptitude).map(([code, idealScore]) => {
                 const userScore = userAptitude[code] ?? 0;
                 const tag = getSkillTag(
@@ -267,10 +283,10 @@ export default function PrintableCareerOptions({
                 return (
                   <div
                     key={code}
-                    className="grid grid-cols-[140px_1fr_90px] items-center gap-1"
+                    className="grid grid-cols-[130px_1fr_85px] items-center gap-1"
                   >
-                    <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <i className={`bi ${APTITUDE_ICONS[code]} text-blue-500`} />
+                    <div className="flex items-center gap-1.5 text-xs text-gray-700 font-medium">
+                      <i className={`bi ${APTITUDE_ICONS[code]}`} style={{ color: "#2563eb" }} />
                       {APTITUDE_LABELS[code]?.[language]}
                     </div>
 
@@ -279,7 +295,8 @@ export default function PrintableCareerOptions({
                     </div>
 
                     <span
-                      className={`px-2 py-0.5 text-[10px] rounded-full border min-w-[88px] text-center ${tag.cls}`}
+                      className="px-2 py-0.5 text-[10px] rounded-full border text-center font-semibold"
+                      style={tag.style}
                     >
                       {tag.text}
                     </span>
@@ -300,20 +317,31 @@ export default function PrintableCareerOptions({
 
   return (
     <>
-      {/* ================= MATCH CHART PAGE ================= */}
+      {/* ================= MATCH CHART PAGE (Page 9) ================= */}
       {chartData.length > 0 && (
-        <div className="print-page">
-          <PrintableCareerMatchChart
-            chartData={chartData}
-            language={language}
-          />
-        </div>
+        <PrintableCareerMatchChart
+          chartData={chartData}
+          language={language}
+        />
       )}
 
-      {/* ================= CAREER PAGES ================= */}
+      {/* ================= CAREER PAGES (Pages 10 to 14, 2 per page) ================= */}
       {pages.map((pageCareers, pageIndex) => (
-        <div key={pageIndex} className="print-page">
-
+        <div
+          key={pageIndex}
+          className="print-page font-sans text-gray-900"
+          style={{
+            width: "210mm",
+            minHeight: "297mm",
+            boxSizing: "border-box",
+            padding: "10mm 14mm",
+            background: "#ffffff",
+            display: "flex",
+            flexDirection: "column",
+            pageBreakAfter: "always",
+            breakAfter: "page",
+          }}
+        >
           {/* ---------- PAGE CONTENT ---------- */}
           <div
             style={{
@@ -324,13 +352,13 @@ export default function PrintableCareerOptions({
           >
             {/* ---------- PAGE HEADING (ONLY FIRST CAREER PAGE) ---------- */}
             {pageIndex === 0 && (
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-blue-800">
+              <div className="text-center mb-4">
+                <h2 className="text-2xl font-bold" style={{ color: "#1e3a8a" }}>
                   {language === "mr"
                     ? "शिफारस केलेली करिअर"
                     : "Recommended Careers"}
                 </h2>
-                <p className="text-sm text-gray-600 max-w-xl mx-auto mt-1">
+                <p className="text-xs text-gray-500 max-w-xl mx-auto mt-1">
                   {language === "mr"
                     ? "तुमच्या व्यक्तिमत्व, आवडी आणि क्षमतांवर आधारित करिअर पर्याय."
                     : "These career options are recommended based on your personality, interests, and aptitude strengths."}
@@ -338,7 +366,7 @@ export default function PrintableCareerOptions({
               </div>
             )}
 
-            {/* ---------- CAREER CARDS ---------- */}
+            {/* ---------- CAREER CARDS (2 PER PAGE) ---------- */}
             <div className="space-y-4">
               {pageCareers.map((career) => (
                 <CareerCard key={career.id} career={career} />
@@ -365,10 +393,8 @@ export default function PrintableCareerOptions({
             />
             {pageIndex + 5}
           </div>
-
         </div>
       ))}
-
     </>
   );
 }

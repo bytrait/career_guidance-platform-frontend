@@ -50,7 +50,7 @@ function getCategory(traitJsonKey, score) {
   );
 }
 
-/* ---------------- TRAIT CARD (UNCHANGED DESIGN) ---------------- */
+/* ---------------- TRAIT CARD ---------------- */
 
 function TraitCard({ trait, language }) {
   const c = trait.content;
@@ -60,59 +60,74 @@ function TraitCard({ trait, language }) {
 
   return (
     <div
-      className="bg-white  border border-gray-50 rounded-2xl p-4"
+      className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm"
       style={{ pageBreakInside: "avoid" }}
     >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-blue-700 font-semibold text-lg flex items-center">
-          <i className="bi bi-person-lines-fill mr-2"></i>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-semibold text-base flex items-center" style={{ color: "#1e3a8a" }}>
+          <i className="bi bi-person-lines-fill mr-2" style={{ color: "#2563eb" }}></i>
           {trait.label}
         </h3>
 
-        <div className="text-[10px] bg-blue-50 text-blue-700 px-2 py-1 rounded-full font-medium">
+        <div
+          className="text-[11px] px-2.5 py-0.5 rounded-full font-semibold border"
+          style={{ backgroundColor: "#eff6ff", color: "#1d4ed8", borderColor: "#bfdbfe" }}
+        >
           {trait.title}
         </div>
       </div>
 
-      <div className="bg-gray-50 rounded-xl p-3 mb-4 border border-gray-100">
-        <p className="text-gray-800 text-sm leading-relaxed font-medium">
+      <div
+        className="rounded-xl p-3 mb-3 border"
+        style={{ backgroundColor: "#f8fafc", borderColor: "#f1f5f9" }}
+      >
+        <p className="text-xs leading-relaxed font-medium" style={{ color: "#1e293b" }}>
           {c.meaning?.[language]}
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 mb-4">
-        <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
-          <p className="text-gray-500 text-xs mb-1">Behavior</p>
-          <p className="text-gray-700 text-xs">
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <div
+          className="rounded-lg p-2 border"
+          style={{ backgroundColor: "#f8fafc", borderColor: "#f1f5f9" }}
+        >
+          <p className="text-[11px] font-semibold mb-0.5" style={{ color: "#64748b" }}>Behavior</p>
+          <p className="text-xs font-medium" style={{ color: "#334155" }}>
             {renderShort(c.how_it_shows?.[language])}
           </p>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
-          <p className="text-gray-500 text-xs mb-1">Learning</p>
-          <p className="text-gray-700 text-xs">
+        <div
+          className="rounded-lg p-2 border"
+          style={{ backgroundColor: "#f8fafc", borderColor: "#f1f5f9" }}
+        >
+          <p className="text-[11px] font-semibold mb-0.5" style={{ color: "#64748b" }}>Learning</p>
+          <p className="text-xs font-medium" style={{ color: "#334155" }}>
             {renderShort(c.learning_preference?.[language])}
           </p>
         </div>
       </div>
 
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-4">
-        <p className="text-xs text-blue-700 mb-1">Strength</p>
-        <p className="text-gray-800 text-xs font-semibold">
+      <div
+        className="rounded-xl p-2.5 mb-2.5 border"
+        style={{ backgroundColor: "#eff6ff", borderColor: "#bfdbfe" }}
+      >
+        <p className="text-[11px] font-bold mb-0.5" style={{ color: "#1e3a8a" }}>Strength</p>
+        <p className="text-xs font-semibold" style={{ color: "#1d4ed8" }}>
           {renderShort(c.strengths?.[language])}
         </p>
       </div>
 
       <div className="pt-2 border-t border-gray-100">
-        <p className="text-xs text-gray-500 mb-1">Growth</p>
-        <p className="text-xs text-gray-700">
+        <p className="text-[11px] font-medium" style={{ color: "#64748b" }}>Growth</p>
+        <p className="text-xs" style={{ color: "#334155" }}>
           {renderShort(c.growth_suggestions?.[language])}
         </p>
       </div>
 
-      <div className="pt-2 border-t border-gray-100 mt-2">
-        <p className="text-xs text-gray-500 mb-1">Reflection</p>
-        <p className="text-xs text-gray-700">
+      <div className="pt-2 border-t border-gray-100 mt-1.5">
+        <p className="text-[11px] font-medium" style={{ color: "#64748b" }}>Reflection</p>
+        <p className="text-xs italic" style={{ color: "#475569" }}>
           {c.reflection_prompts?.[language]?.[0]}
         </p>
       </div>
@@ -120,7 +135,7 @@ function TraitCard({ trait, language }) {
   );
 }
 
-/* ---------------- MAIN COMPONENT ---------------- */
+/* ---------------- MAIN COMPONENT (2 CLEAN PAGES) ---------------- */
 
 export default function PrintablePersonalityStrengthsA4({
   scores = [],
@@ -162,120 +177,147 @@ export default function PrintablePersonalityStrengthsA4({
     setTraits(list);
   }, [scores, language]);
 
+  const page1Traits = traits.slice(0, 2);
+  const page2Traits = traits.slice(2);
+
   return (
-    <div
-      style={{
-        width: "210mm",
-        padding: "10mm",
-        background: "#fff",
-        pageBreakAfter: "always",
-        breakAfter: "page",
-      }}
-    >
-      {/* HEADER (unchanged, just tighter spacing) */}
-      <div className="text-center mb-6">
-        <div className="flex justify-center items-center gap-3">
-          <i className="bi bi-lightbulb text-yellow-400 text-4xl" />
-          <h1 className="text-4xl font-bold text-blue-800">
+    <>
+      {/* ---------------- PAGE 1 of Personality (Report Page 3) ---------------- */}
+      <div
+        className="print-page font-sans"
+        style={{
+          width: "210mm",
+          minHeight: "297mm",
+          boxSizing: "border-box",
+          padding: "10mm 14mm",
+          background: "#ffffff",
+          pageBreakAfter: "always",
+          breakAfter: "page",
+        }}
+      >
+        {/* HEADER */}
+        <div className="text-center mb-4">
+          <div className="flex justify-center items-center gap-3">
+            <i className="bi bi-lightbulb text-yellow-500 text-3xl" />
+            <h1 className="text-3xl font-bold" style={{ color: "#1e3a8a" }}>
+              {language === "mr"
+                ? "तुमचे व्यक्तिमत्त्व विश्लेषण"
+                : "Your Personality Snapshot"}
+            </h1>
+          </div>
+
+          <p className="text-base text-gray-500 mt-1">
             {language === "mr"
-              ? "तुमचे व्यक्तिमत्त्व विश्लेषण"
-              : "Your Personality Snapshot"}
-          </h1>
-        </div>
+              ? "तुम्ही कसे विचार करता आणि कसे शिकता हे समजून घ्या"
+              : "Understanding how you think and learn"}
+          </p>
 
-        <p className="text-xl text-gray-600 mt-1">
-          {language === "mr"
-            ? "तुम्ही कसे विचार करता आणि कसे शिकता हे समजून घ्या"
-            : "Understanding how you think and learn"}
-        </p>
+          <div className="mt-3 mb-3">
+            <hr style={{ border: "none", height: 1, backgroundColor: "#e2e8f0" }} />
+          </div>
 
-        <div className="mt-6 mb-6">
-          <hr style={{ border: "none", height: 1, backgroundColor: "#eef2f7" }} />
-        </div>
-
-        <p className="text-xl text-gray-600 mt-4 max-w-2xl mx-auto">
-          {language === "mr"
-            ? "तुमचे विचार, भावना आणि शिकण्याची पद्धत समजून घेण्यासाठी तुमच्या व्यक्तिमत्त्व गुणांचा अभ्यास करूया."
-            : "Let's explore your personality traits to see what makes you unique and how you like to think and learn."}
-        </p>
-      </div>
-
-      {/* MAIN GRID - FORCE 2 COLUMN */}
-      <div className="grid grid-cols-12 gap-4 mt-6">
-        {/* IMAGE (smaller column) */}
-        <div className="col-span-4 flex justify-center items-center">
-          <img
-            src={PersonalityImg}
-            alt="growth"
-            className="w-[260px] h-[220px] object-contain"
-          />
-        </div>
-
-        {/* CHART (bigger column) */}
-        <div className="col-span-8 flex justify-center">
-          <BarChart
-            width={420}
-            height={280}
-            data={chartData}
-            margin={{ top: 0, right: 20, left: -20, bottom: 40 }}
-          >
-            <CartesianGrid stroke="#e5e7eb" />
-            <XAxis
-              dataKey="name"
-              interval={0}
-              angle={-25}
-              textAnchor="end"
-              height={70}
-              tick={{ fontSize: 10, fill: "#4b5563" }}
-            />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#2563eb" isAnimationActive={false}>
-              <LabelList dataKey="value" position="middle" fill="white" />
-            </Bar>
-          </BarChart>
-        </div>
-      </div>
-
-      <div className="w-full mt-10 mb-4">
-        <h3 className="text-2xl font-semibold text-gray-800">
-          {language === "mr"
-            ? "तुमचे व्यक्तिमत्त्व तपशील"
-            : "Your Personality Insights"}
-        </h3>
-
-        <p className="text-gray-500 mt-1 text-sm">
-          {language === "mr"
-            ? "तुमच्या गुणधर्मांचे सविस्तर विश्लेषण"
-            : "A deeper understanding of your personality traits"}
-        </p>
-      </div>
-
-      {/* TRAITS - FORCE 2 COLUMN */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-6">
-        {traits.map((t) => (
-          <TraitCard key={t.code} trait={t} language={language} />
-        ))}
-
-        {/* 6th Card (Motivation) */}
-        <div className="bg-white border border-gray-50 rounded-2xl p-6 flex items-center justify-center text-center h-full">
-          <p className="text-xl sm:text-5xl font-bold leading-relaxed">
-            <span className="text-gray-900">
-              {language === "mr"
-                ? "तुमच्यातील प्रत्येक गुण"
-                : "Every trait you have"}
-            </span>
-
-            <br />
-
-            <span className="text-blue-600  bg-clip-text">
-              {language === "mr"
-                ? "तुमची ताकद आहे"
-                : "is your strength"}
-            </span>
+          <p className="text-sm text-gray-600 max-w-2xl mx-auto">
+            {language === "mr"
+              ? "तुमचे विचार, भावना आणि शिकण्याची पद्धत समजून घेण्यासाठी तुमच्या व्यक्तिमत्त्व गुणांचा अभ्यास करूया."
+              : "Let's explore your personality traits to see what makes you unique and how you like to think and learn."}
           </p>
         </div>
+
+        {/* MAIN GRID - IMAGE + CHART */}
+        <div className="grid grid-cols-12 gap-4 items-center mb-4">
+          {/* IMAGE */}
+          <div className="col-span-4 flex justify-center items-center">
+            <img
+              src={PersonalityImg}
+              alt="personality"
+              className="w-[200px] h-[180px] object-contain"
+            />
+          </div>
+
+          {/* CHART */}
+          <div className="col-span-8 flex justify-center">
+            <BarChart
+              width={380}
+              height={200}
+              data={chartData}
+              margin={{ top: 10, right: 10, left: -20, bottom: 25 }}
+            >
+              <CartesianGrid stroke="#f1f5f9" />
+              <XAxis dataKey="name" interval={0} angle={-15} textAnchor="end" height={45} tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#2563eb" isAnimationActive={false}>
+                <LabelList dataKey="value" position="middle" fill="white" fontSize={11} />
+              </Bar>
+            </BarChart>
+          </div>
+        </div>
+
+        {/* SUBTITLE */}
+        <div className="w-full mb-3">
+          <h3 className="text-xl font-bold" style={{ color: "#1e3a8a" }}>
+            {language === "mr"
+              ? "तुमचे व्यक्तिमत्त्व तपशील"
+              : "Your Personality Insights"}
+          </h3>
+          <p className="text-xs text-gray-500">
+            {language === "mr"
+              ? "तुमच्या गुणधर्मांचे सविस्तर विश्लेषण"
+              : "A deeper understanding of your personality traits"}
+          </p>
+        </div>
+
+        {/* TRAITS ROW (2 CARDS) */}
+        <div className="grid grid-cols-2 gap-4">
+          {page1Traits.map((t) => (
+            <TraitCard key={t.code} trait={t} language={language} />
+          ))}
+        </div>
       </div>
-    </div>
+
+      {/* ---------------- PAGE 2 of Personality (Report Page 4) ---------------- */}
+      <div
+        className="print-page font-sans"
+        style={{
+          width: "210mm",
+          minHeight: "297mm",
+          boxSizing: "border-box",
+          padding: "12mm 14mm",
+          background: "#ffffff",
+          pageBreakAfter: "always",
+          breakAfter: "page",
+        }}
+      >
+        <div className="grid grid-cols-2 gap-5 h-full">
+          {page2Traits.map((t) => (
+            <TraitCard key={t.code} trait={t} language={language} />
+          ))}
+
+          {/* 6th Card (Motivation Card) */}
+          <div
+            className="rounded-2xl p-6 flex items-center justify-center text-center border"
+            style={{
+              backgroundColor: "#eff6ff",
+              borderColor: "#bfdbfe",
+              pageBreakInside: "avoid",
+            }}
+          >
+            <p className="text-3xl font-extrabold leading-relaxed">
+              <span style={{ color: "#1e3a8a" }}>
+                {language === "mr"
+                  ? "तुमच्यातील प्रत्येक गुण"
+                  : "Every trait you have"}
+              </span>
+              <br />
+              <span style={{ color: "#2563eb" }}>
+                {language === "mr"
+                  ? "तुमची ताकद आहे"
+                  : "is your strength"}
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

@@ -14,3 +14,15 @@ export const submitScores = (scoreData) => {
 export const getScores = () => {
   return API.get('/assessment/scores');
 };
+
+export const downloadReportPdf = (payload) => {
+  return API.post('/assessment/report/download-pdf', payload, {
+    responseType: 'blob',
+  });
+};
+
+export const downloadCounsellorStudentReportPdf = (studentId, payload) => {
+  return API.post(`/assessment/report/download-pdf/${studentId}`, payload, {
+    responseType: 'blob',
+  });
+};
