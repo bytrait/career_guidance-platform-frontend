@@ -3,6 +3,27 @@ import careerFields from "../../data/career_fields.json";
 import Spinner from "../common/Spinner";
 import CareerMatchChart from "./CareerMatchChart";
 
+function cosineSimilarity(user, ideal) {
+  let dot = 0;
+  let userMag = 0;
+  let idealMag = 0;
+
+  for (const key of ["R", "I", "A", "S", "E", "C"]) {
+    const u = Number(user[key]) || 0;
+    const i = Number(ideal[key]) || 0;
+
+    dot += u * i;
+    userMag += u * u;
+    idealMag += i * i;
+  }
+
+  if (userMag === 0 || idealMag === 0) {
+    return 0;
+  }
+
+  return dot / (Math.sqrt(userMag) * Math.sqrt(idealMag));
+}
+
 export default function CareerOptions({
   scores = [],
   careers = [],
@@ -20,12 +41,22 @@ export default function CareerOptions({
     if (!scores.length || careers.length === 0) return [];
 
     // Convert scores array → object { R: 18, I: 22, ... }
-    const userScoresObj = scores.reduce((acc, item) => {
-      if (item.assessmentType === "RIASEC") {
-        acc[item.traitOrCategoryCode] = item.score;
-      }
-      return acc;
-    }, {});
+    const userScoresObj = {
+      R: 0,
+      I: 0,
+      A: 0,
+      S: 0,
+      E: 0,
+      C: 0,
+    };
+
+    scores
+      .filter((s) => s.assessmentType === "RIASEC")
+      .forEach((s) => {
+        if (userScoresObj.hasOwnProperty(s.traitOrCategoryCode)) {
+          userScoresObj[s.traitOrCategoryCode] = Number(s.score) || 0;
+        }
+      });
 
     // ✅ Use category_id instead of category name
     const categoryIds = [
@@ -44,19 +75,10 @@ export default function CareerOptions({
 
         if (!field || !field.scores) return null;
 
-        let weighted = 0;
-
-        ["R", "I", "A", "S", "E", "C"].forEach(key => {
-          const userTrait = userScoresObj[key];
-          const idealWeight = field.scores[key];
-
-          if (
-            typeof userTrait === "number" &&
-            typeof idealWeight === "number"
-          ) {
-            weighted += (userTrait / 30) * idealWeight;
-          }
-        });
+        const similarity = cosineSimilarity(
+          userScoresObj,
+          field.scores
+        );
 
         return {
           category_id: id,
@@ -64,7 +86,8 @@ export default function CareerOptions({
             language === "mr"
               ? field.careerField?.mr
               : field.careerField?.en,
-          value: Math.round(weighted * 100),
+          value: Math.round(similarity * 100),
+          icon: field.icon,
         };
       })
       .filter(Boolean)

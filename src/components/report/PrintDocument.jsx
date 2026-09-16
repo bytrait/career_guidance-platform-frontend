@@ -24,6 +24,27 @@ import PersonalityStrengths from "./PersonalityStrengths";
  * - selectedCareersHtml: OPTIONAL prebuilt HTML fragments for career sections (string) — if passed, Render them after main report.
  */
 
+function cosineSimilarity(user, ideal) {
+  let dot = 0;
+  let userMag = 0;
+  let idealMag = 0;
+
+  for (const key of ["R", "I", "A", "S", "E", "C"]) {
+    const u = Number(user[key]) || 0;
+    const i = Number(ideal[key]) || 0;
+
+    dot += u * i;
+    userMag += u * u;
+    idealMag += i * i;
+  }
+
+  if (userMag === 0 || idealMag === 0) {
+    return 0;
+  }
+
+  return dot / (Math.sqrt(userMag) * Math.sqrt(idealMag));
+}
+
 export default function PrintDocument({
   scores = [],
   language = "en",
@@ -37,12 +58,22 @@ export default function PrintDocument({
   if (!recommendedCareers.length) return [];
 
   // -------- Build RIASEC Map --------
-  const riasecScores = scores
+  const riasecScores = {
+    R: 0,
+    I: 0,
+    A: 0,
+    S: 0,
+    E: 0,
+    C: 0,
+  };
+
+  scores
     .filter((s) => s.assessmentType === "RIASEC")
-    .reduce((acc, s) => {
-      acc[s.traitOrCategoryCode] = s.score;
-      return acc;
-    }, {});
+    .forEach((s) => {
+      if (riasecScores.hasOwnProperty(s.traitOrCategoryCode)) {
+        riasecScores[s.traitOrCategoryCode] = Number(s.score) || 0;
+      }
+    });
 
   // -------- Build Chart Data (same logic as PrintableCareerOptions) --------
   const categoryIds = [
@@ -61,17 +92,14 @@ export default function PrintDocument({
 
       if (!field || !field.scores) return null;
 
-      let weighted = 0;
-
-      ["R", "I", "A", "S", "E", "C"].forEach((key) => {
-        if (riasecScores[key] != null && field.scores[key] != null) {
-          weighted += (riasecScores[key] / 30) * field.scores[key];
-        }
-      });
+      const similarity = cosineSimilarity(
+        riasecScores,
+        field.scores
+      );
 
       return {
         category_id: id,
-        value: Math.round(weighted * 100),
+        value: Math.round(similarity * 100),
       };
     })
     .filter(Boolean)
